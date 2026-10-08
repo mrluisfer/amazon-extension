@@ -77,11 +77,14 @@ export const HistoryQuerySchema = v.object({
   ),
 });
 
+/** A price alert always needs a target price ("avísame si baja de…"). */
 export const TrackProductSchema = v.object({
   marketplace: MarketplaceIdSchema,
   asin: AsinSchema,
-  targetPriceCents: v.optional(v.nullable(PriceCentsSchema)),
+  targetPriceCents: PriceCentsSchema,
 });
 export type TrackProductInput = v.InferOutput<typeof TrackProductSchema>;
+
+export const UpdateTrackedSchema = v.object({ targetPriceCents: PriceCentsSchema });
 
 export const UuidParamSchema = v.object({ id: v.pipe(v.string(), v.uuid()) });

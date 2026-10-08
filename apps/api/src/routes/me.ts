@@ -13,7 +13,8 @@ export const meRoute = new Hono<AppEnv>()
       .select({ tracked: count() })
       .from(trackedProducts)
       .where(eq(trackedProducts.userId, c.var.auth.userId));
-    return c.json({ userId: c.var.auth.userId, trackedCount: row?.tracked ?? 0 });
+    const { userId, hasAccount } = c.var.auth;
+    return c.json({ userId, hasAccount, trackedCount: row?.tracked ?? 0 });
   })
   /** Revokes only the calling token (e.g. on uninstall/sign-out). */
   .post('/logout', async (c) => {

@@ -1,7 +1,7 @@
 import { apiTokens, users } from '@repo/db';
 import { and, eq, isNull } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
-import { unauthorized } from '../lib/errors';
+import { ApiError, unauthorized } from '../lib/errors';
 import { hashToken, isWellFormedToken } from '../lib/tokens';
 import type { AppEnv } from '../types';
 
@@ -14,13 +14,19 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 
   const { db } = c.var.deps;
   const [row] = await db
-    .select({ tokenId: apiTokens.id, userId: apiTokens.userId, lastUsedAt: apiTokens.lastUsedAt })
+    .select({
+      tokenId: apiTokens.id,
+      userId: apiTokens.userId,
+      lastUsedAt: apiTokens.lastUsedAt,
+      email: users.email,
+    })
     .from(apiTokens)
+    .innerJoin(users, eq(users.id, apiTokens.userId))
     .where(and(eq(apiTokens.tokenHash, hashToken(token)), isNull(apiTokens.revokedAt)))
     .limit(1);
   if (!row) throw unauthorized();
 
-  c.set('auth', { userId: row.userId, tokenId: row.tokenId });
+  c.set('auth', { userId: row.userId, tokenId: row.tokenId, hasAccount: row.email !== null });
 
   // Throttled "last seen" bookkeeping: at most one write per token per hour.
   const now = new Date();
@@ -31,5 +37,13 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
     ]).catch((err) => console.error('auth touch failed', err));
   }
 
+  await next();
+});
+
+/** Features tied to a person (price alerts) need a registered account. Use after requireAuth. */
+export const requireAccount = createMiddleware<AppEnv>(async (c, next) => {
+  if (!c.var.auth.hasAccount) {
+    throw new ApiError(403, 'account_required', 'Sign in to use price alerts');
+  }
   await next();
 });

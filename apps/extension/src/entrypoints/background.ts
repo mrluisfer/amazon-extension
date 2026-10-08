@@ -20,7 +20,10 @@ export default defineBackground(() => {
       await flushIfPending(marketplace, asin).catch(() => {});
       return api.history(marketplace, asin, days);
     },
+    'tracked:status': ({ marketplace, asin }) => api.trackingStatus(marketplace, asin),
     'tracked:list': async () => (await api.listTracked()).items,
+    'tracked:update': ({ id, targetPriceCents }) => api.updateTracked(id, targetPriceCents),
+    'account:status': async () => ({ hasAccount: (await api.me()).hasAccount }),
     'tracked:add': (input) => api.track(input),
     'tracked:remove': async ({ id }) => api.untrack(id),
     'account:delete': async () => {

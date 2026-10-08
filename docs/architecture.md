@@ -52,7 +52,7 @@
 
 ## Features beyond Keepa
 
-### Hide sponsored search results
+### Hide sponsored content (search + product pages)
 
 `search.content` runs on `/s?…` pages at `document_start` with two layers:
 
@@ -60,6 +60,14 @@
 2. **JS** (`findSponsoredContainers` in `@repo/amazon-parser`) tags whatever CSS can't express (localized "Patrocinado" leaf-text fallback, hashed `ctaSponsored` classes) with `data-ph-sponsored`, re-scanning on DOM mutations (coalesced to one scan per frame).
 
 Turning the setting off sets `data-ph-show-sponsored` on `<html>`, which disables every rule instantly. A guard never hides `.s-main-slot`/`#search`. Selectors were verified on live amazon.com.mx pages (2026-10-08) and are covered by a real-capture fixture; the per-tab badge shows how many items were hidden.
+
+**Product pages** (`product-sponsored.content`, separate from the price-panel script so its CSS lands at `document_start`) use `findSponsoredOnProductPage`, which picks the *most specific* unit: the outermost `[id^="ape_Detail_"]` ad placement, sponsored carousels (`[id^="sp_detail"]` → nearest `.celwidget[id*="_feature_div"]`), brand widgets (`sims-discoveryAndInspiration`, `aax-` links), and single sponsored `li.a-carousel-card`s inside organic carousels. Ads can live *inside* `#ppd` or the reviews widget, so a core/protected stop list (`#ppd`, `#centerCol`, `#rightCol`, buy box, price, reviews, "Comprados juntos") is never hidden nor anything containing it. Both page types share `lib/sponsored-hider.ts` (setting, observer, badge).
+
+### Price alerts ("Avísame si baja de…")
+
+- **Account required.** Anonymous installs can browse history and contribute prices, but alerts are tied to a person: `requireAccount` (users.email set) guards every `/v1/tracked` write/list → `403 account_required`. The panel asks to sign in instead of showing the form. *Sign-in itself is not implemented yet* — see `users.email` / Neon Auth.
+- **Target price is mandatory** (schema-level, API and UI: the button stays disabled until `parseTargetPrice` accepts the input).
+- **One alert per product.** The `(user_id, product_id)` unique constraint is the source of truth: `POST` uses `ON CONFLICT DO NOTHING` and returns `409 already_tracked`; changing the target is an explicit `PATCH` (which resets `last_notified_at`). The panel loads `GET /v1/tracked/by-product/:m/:asin` (account flag + existing alert in one request) and shows "Cambiar / Dejar de seguir" instead of the form.
 
 ## Roadmap ideas (differentiators vs Keepa)
 

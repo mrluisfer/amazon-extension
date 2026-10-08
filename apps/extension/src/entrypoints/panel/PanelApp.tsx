@@ -1,6 +1,7 @@
 import { AsinSchema, formatPrice, type MarketplaceId, MarketplaceIdSchema } from '@repo/shared';
 import { useMemo, useState } from 'react';
 import * as v from 'valibot';
+import { PriceAlert } from '@/components/PriceAlert';
 import { PriceChart, SERIES_META } from '@/components/PriceChart';
 import { alignSeries, decodeAll, statsFor } from '@/lib/chart-data';
 import { sendMessage } from '@/lib/messaging';
@@ -108,57 +109,8 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
         </>
       )}
 
-      <TrackForm marketplace={marketplace} asin={asin} />
+      <PriceAlert marketplace={marketplace} asin={asin} />
     </div>
-  );
-}
-
-function TrackForm({ marketplace, asin }: { marketplace: MarketplaceId; asin: string }) {
-  const [target, setTarget] = useState('');
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const amount = Number(target);
-    const targetPriceCents =
-      target && Number.isFinite(amount) && amount > 0 ? Math.round(amount * 100) : null;
-    setStatus('saving');
-    try {
-      await sendMessage('tracked:add', { marketplace, asin, targetPriceCents });
-      setStatus('saved');
-    } catch {
-      setStatus('error');
-    }
-  };
-
-  return (
-    <form
-      onSubmit={submit}
-      className="mt-auto flex items-center gap-2 border-t border-gray-100 pt-2 text-xs"
-    >
-      <label htmlFor="target" className="text-gray-600">
-        Avísame si baja de
-      </label>
-      <input
-        id="target"
-        inputMode="decimal"
-        placeholder="$ precio"
-        value={target}
-        onChange={(e) => setTarget(e.target.value.replace(/[^\d.]/g, ''))}
-        className="w-24 rounded border border-gray-300 px-2 py-1"
-      />
-      <button
-        type="submit"
-        disabled={status === 'saving'}
-        className="rounded bg-brand px-3 py-1 font-medium text-white disabled:opacity-60"
-      >
-        Seguir
-      </button>
-      <span aria-live="polite" className="text-gray-500">
-        {status === 'saved' && 'Guardado ✓'}
-        {status === 'error' && 'Error al guardar'}
-      </span>
-    </form>
   );
 }
 

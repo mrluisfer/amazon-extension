@@ -23,6 +23,13 @@ export interface TrackedProduct {
   createdAt: string;
 }
 
+/** Response of GET /v1/tracked/by-product/:marketplace/:asin — everything the panel needs. */
+export interface TrackingStatus {
+  /** Price alerts require a registered account (not just an anonymous install). */
+  hasAccount: boolean;
+  item: TrackedProduct | null;
+}
+
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }

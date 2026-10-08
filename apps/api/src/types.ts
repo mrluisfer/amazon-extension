@@ -17,6 +17,8 @@ export interface Deps {
 export interface AuthContext {
   userId: string;
   tokenId: string;
+  /** True once the anonymous user is linked to a registered account (users.email). */
+  hasAccount: boolean;
 }
 
 export interface AppEnv {

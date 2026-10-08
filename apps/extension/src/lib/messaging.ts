@@ -5,7 +5,9 @@ import {
   marketplaceFromHostname,
   ObservationSchema,
   type TrackedProduct,
+  type TrackingStatus,
   TrackProductSchema,
+  UpdateTrackedSchema,
 } from '@repo/shared';
 import * as v from 'valibot';
 import { type Browser, browser } from 'wxt/browser';
@@ -35,7 +37,16 @@ const messages = {
       days: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(3650)),
     }),
   },
+  'tracked:status': {
+    from: ['extension'],
+    input: v.object({ marketplace: MarketplaceIdSchema, asin: AsinSchema }),
+  },
   'tracked:list': { from: ['extension'], input: v.object({}) },
+  'tracked:update': {
+    from: ['extension'],
+    input: v.object({ id: v.pipe(v.string(), v.uuid()), ...UpdateTrackedSchema.entries }),
+  },
+  'account:status': { from: ['extension'], input: v.object({}) },
   'tracked:add': { from: ['extension'], input: TrackProductSchema },
   'tracked:remove': { from: ['extension'], input: v.object({ id: v.pipe(v.string(), v.uuid()) }) },
   'account:delete': { from: ['extension'], input: v.object({}) },
@@ -48,7 +59,10 @@ const messages = {
 interface MessageOutputs {
   'observations:report': { queued: number };
   'history:get': HistoryResponse;
+  'tracked:status': TrackingStatus;
   'tracked:list': TrackedProduct[];
+  'tracked:update': { id: string };
+  'account:status': { hasAccount: boolean };
   'tracked:add': { id: string };
   'tracked:remove': null;
   'account:delete': null;

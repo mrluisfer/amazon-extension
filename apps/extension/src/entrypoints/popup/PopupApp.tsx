@@ -9,7 +9,13 @@ import { useAsync } from '@/lib/use-async';
 
 export function PopupApp() {
   const [consent, setConsent] = useState<Consent | null>(null);
-  const [tracked, reload] = useAsync(() => sendMessage('tracked:list', {}), []);
+  // Alerts are tied to a registered account: only load the list when there is one.
+  const [tracked, reload] = useAsync(async () => {
+    const { hasAccount } = await sendMessage('account:status', {});
+    return hasAccount
+      ? { hasAccount, items: await sendMessage('tracked:list', {}) }
+      : { hasAccount, items: [] };
+  }, []);
 
   useEffect(() => {
     void consentItem.getValue().then(setConsent);
@@ -57,12 +63,17 @@ export function PopupApp() {
         </h2>
         {tracked.status === 'loading' && <p className="text-gray-500">Cargando…</p>}
         {tracked.status === 'error' && <p className="text-red-700">No se pudo cargar la lista.</p>}
-        {tracked.status === 'success' && tracked.data.length === 0 && (
-          <p className="text-gray-500">Abre un producto en Amazon y pulsa «Seguir».</p>
+        {tracked.status === 'success' && !tracked.data.hasAccount && (
+          <p className="text-gray-500">Inicia sesión para crear avisos de precio y verlos aquí.</p>
         )}
-        {tracked.status === 'success' && tracked.data.length > 0 && (
+        {tracked.status === 'success' &&
+          tracked.data.hasAccount &&
+          tracked.data.items.length === 0 && (
+            <p className="text-gray-500">Abre un producto en Amazon y crea un aviso de precio.</p>
+          )}
+        {tracked.status === 'success' && tracked.data.items.length > 0 && (
           <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">
-            {tracked.data.map((item) => (
+            {tracked.data.items.map((item) => (
               <li key={item.id} className="flex items-center gap-2">
                 {item.imageUrl && (
                   <img src={item.imageUrl} alt="" className="h-10 w-10 object-contain" />

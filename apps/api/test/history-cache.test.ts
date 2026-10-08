@@ -1,35 +1,12 @@
-import type { Database } from '@repo/db';
 import type { HistoryResponse } from '@repo/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createApp } from '../src/app';
-import { MemoryRateLimiter } from '../src/lib/rate-limiter';
-import { generateToken } from '../src/lib/tokens';
+import { authHeaders, fakeAuthDb, makeTestApp } from './helpers';
 
 const getHistory = vi.fn<() => Promise<HistoryResponse>>();
 vi.mock('../src/services/history', () => ({ getHistory: () => getHistory() }));
 
-/** Just enough of a db for requireAuth: a valid, recently-used token. */
-const authOnlyDb = {
-  select: () => ({
-    from: () => ({
-      where: () => ({
-        limit: async () => [{ tokenId: 't1', userId: 'u1', lastUsedAt: new Date() }],
-      }),
-    }),
-  }),
-} as unknown as Database;
-
-const app = createApp({
-  db: authOnlyDb,
-  limiters: {
-    installs: new MemoryRateLimiter(10, 1),
-    api: new MemoryRateLimiter(100, 1),
-    ingest: new MemoryRateLimiter(100, 1),
-  },
-  config: { isProduction: false, allowedOrigins: [], trustProxy: false },
-});
-
-const headers = { authorization: `Bearer ${generateToken()}` };
+const app = makeTestApp(fakeAuthDb({ hasAccount: false }));
+const headers = authHeaders();
 const url = '/v1/products/mx/B0CHX1W1XY/history?days=365';
 
 const history = (series: number[], generatedAt: string): HistoryResponse => ({

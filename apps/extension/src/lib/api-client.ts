@@ -5,6 +5,7 @@ import type {
   MarketplaceId,
   Observation,
   TrackedProduct,
+  TrackingStatus,
   TrackProductInput,
 } from '@repo/shared';
 import { hc } from 'hono/client';
@@ -86,6 +87,23 @@ export const api = {
 
   track: (input: TrackProductInput) =>
     call<{ id: string }>(() => authedClient.v1.tracked.$post({ json: input })),
+
+  trackingStatus: (marketplace: MarketplaceId, asin: string) =>
+    call<TrackingStatus>(() =>
+      authedClient.v1.tracked['by-product'][':marketplace'][':asin'].$get({
+        param: { marketplace, asin },
+      }),
+    ),
+
+  updateTracked: (id: string, targetPriceCents: number) =>
+    call<{ id: string }>(() =>
+      authedClient.v1.tracked[':id'].$patch({ param: { id }, json: { targetPriceCents } }),
+    ),
+
+  me: () =>
+    call<{ userId: string; hasAccount: boolean; trackedCount: number }>(() =>
+      authedClient.v1.me.$get(),
+    ),
 
   untrack: (id: string) =>
     call<null>(() => authedClient.v1.tracked[':id'].$delete({ param: { id } })),

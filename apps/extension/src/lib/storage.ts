@@ -18,6 +18,12 @@ export const authTokenItem = storage.defineItem<string | null>('local:authToken'
   version: 1,
 });
 
+/** Hide sponsored ("Patrocinado") results on Amazon search pages. On by default. */
+export const hideSponsoredItem = storage.defineItem<boolean>('local:hideSponsored', {
+  fallback: true,
+  version: 1,
+});
+
 /** Pending crowdsourced observations, flushed in batches by the background. */
 export const observationQueueItem = storage.defineItem<Observation[]>('local:observationQueue', {
   fallback: [],

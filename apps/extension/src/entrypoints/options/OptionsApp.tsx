@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { HideSponsoredToggle } from '@/components/HideSponsoredToggle';
 import { sendMessage } from '@/lib/messaging';
 import { type Consent, consentItem } from '@/lib/storage';
 
@@ -74,6 +75,11 @@ export function OptionsApp() {
           </button>
         </div>
         <p className="text-xs text-gray-500">Puedes cambiar esta decisión en cualquier momento.</p>
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-lg border border-gray-200 p-5">
+        <h2 className="text-base font-semibold">Búsquedas</h2>
+        <HideSponsoredToggle description />
       </section>
 
       <section className="flex flex-col gap-3 rounded-lg border border-red-200 p-5">

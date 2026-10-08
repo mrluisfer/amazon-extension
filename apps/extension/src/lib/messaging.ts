@@ -39,6 +39,10 @@ const messages = {
   'tracked:add': { from: ['extension'], input: TrackProductSchema },
   'tracked:remove': { from: ['extension'], input: v.object({ id: v.pipe(v.string(), v.uuid()) }) },
   'account:delete': { from: ['extension'], input: v.object({}) },
+  'sponsored:count': {
+    from: ['content'],
+    input: v.object({ hidden: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(10_000)) }),
+  },
 } as const satisfies Record<string, { from: readonly SenderKind[]; input: v.GenericSchema }>;
 
 interface MessageOutputs {
@@ -48,6 +52,7 @@ interface MessageOutputs {
   'tracked:add': { id: string };
   'tracked:remove': null;
   'account:delete': null;
+  'sponsored:count': null;
 }
 
 export type MessageType = keyof typeof messages;

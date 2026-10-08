@@ -1,0 +1,22 @@
+/*
+ * Injected by the manifest before the DOM is built (no flash of ads).
+ * High-confidence rules only; the content script tags the rest with
+ * [data-ph-sponsored]. Disabled entirely when <html data-ph-show-sponsored>.
+ * Keep in sync with SPONSORED_SELECTORS in packages/amazon-parser/src/selectors.ts.
+ */
+html:not([data-ph-show-sponsored])
+:is(
+  .AdHolder:not(.s-main-slot, #search, .s-search-results),
+  .s-main-slot
+    > .s-result-item:has(
+      .puis-sponsored-label-text,
+      .s-widget-sponsored-label-text,
+      .sponsored-brand-label-info-desktop,
+      a[href*="/sspa/click"],
+      a[aria-label^="Anuncio patrocinado" i]
+    ),
+  [data-ph-sponsored]
+) {
+  /* biome-ignore lint/complexity/noImportantStyles: must beat Amazon's own display rules */
+  display: none !important;
+}

@@ -2,6 +2,7 @@ import { canonicalProductUrl } from '@repo/amazon-parser';
 import { formatPrice, MARKETPLACES } from '@repo/shared';
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
+import { HideSponsoredToggle } from '@/components/HideSponsoredToggle';
 import { sendMessage } from '@/lib/messaging';
 import { type Consent, consentItem } from '@/lib/storage';
 import { useAsync } from '@/lib/use-async';
@@ -45,6 +46,10 @@ export function PopupApp() {
           </button>
         </p>
       )}
+
+      <section className="rounded border border-gray-200 p-2 text-xs">
+        <HideSponsoredToggle />
+      </section>
 
       <section>
         <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">

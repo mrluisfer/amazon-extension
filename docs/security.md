@@ -19,11 +19,14 @@
 |---|---|
 | `storage` | Consent choice, anonymous token, pending observation queue. |
 | `alarms` | Periodic batched upload of observations (MV3 service workers are ephemeral). |
-| `https://www.amazon.com.mx/*` | Read prices on product pages and show the history panel. |
+| `https://www.amazon.com.mx/*` | Read prices on product pages and show the history panel; hide sponsored results on search pages (user setting, on by default, processed locally — nothing is sent). |
 | API origin | Background calls to our API. |
 | `web_accessible_resources: panel.html` (Amazon only) | The history panel iframe. |
 
-Not requested on purpose: `tabs`, `scripting`, `<all_urls>`, `cookies`, `webRequest`, `history`.
+Not requested on purpose: `tabs`, `scripting`, `<all_urls>`, `cookies`, `webRequest`, `history`, `declarativeNetRequest`.
+The background uses `tabs.onUpdated` only to clear the per-tab badge on navigation; it never reads tab URLs, so the `tabs` permission is not needed.
+
+**Single-purpose note (CWS):** hiding sponsored results is framed as part of the same purpose — a cleaner Amazon shopping/price-comparison experience. It only adds attributes/CSS on Amazon search pages, never blocks network requests, and can be turned off in the popup/options.
 
 ## Data collected (keep in sync with OptionsApp.tsx and the privacy policy)
 

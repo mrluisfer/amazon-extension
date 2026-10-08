@@ -28,6 +28,23 @@ export default defineBackground(() => {
       await Promise.all([authTokenItem.setValue(null), observationQueueItem.setValue([])]);
       return null;
     },
+    // Per-tab badge with the number of hidden sponsored results (no extra permission needed).
+    'sponsored:count': async ({ hidden }, sender) => {
+      const tabId = sender.tab?.id;
+      if (tabId === undefined) return null;
+      await browser.action.setBadgeText({
+        tabId,
+        text: hidden > 0 ? String(Math.min(hidden, 99)) : '',
+      });
+      await browser.action.setBadgeBackgroundColor({ tabId, color: '#6b7280' });
+      return null;
+    },
+  });
+
+  // Clear the per-tab badge on navigation (tabs.onUpdated needs no "tabs" permission
+  // as long as we don't read the URL).
+  browser.tabs.onUpdated.addListener((tabId, info) => {
+    if (info.status === 'loading') void browser.action.setBadgeText({ tabId, text: '' });
   });
 
   browser.runtime.onInstalled.addListener(({ reason }) => {

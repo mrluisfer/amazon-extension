@@ -50,6 +50,17 @@
 4. **Storage** — partition `price_observations` by month and drop old partitions (retention). If `price_points` grows past ~10⁹ rows, consider TimescaleDB/ClickHouse.
 5. **Alerts** — worker that, on each accepted point, checks `tracked_products` with `target_price_cents` (indexed) and sends email/Telegram/Web Push.
 
+## Features beyond Keepa
+
+### Hide sponsored search results
+
+`search.content` runs on `/s?…` pages at `document_start` with two layers:
+
+1. **`sponsored.css`** (manifest-injected before the DOM exists → no flash of ads) hides high-confidence ads with `:has()`: `.AdHolder`, results containing `.puis-sponsored-label-text`, `/sspa/click` links, sponsored-widget labels or the `aria-label="Anuncio patrocinado…"`.
+2. **JS** (`findSponsoredContainers` in `@repo/amazon-parser`) tags whatever CSS can't express (localized "Patrocinado" leaf-text fallback, hashed `ctaSponsored` classes) with `data-ph-sponsored`, re-scanning on DOM mutations (coalesced to one scan per frame).
+
+Turning the setting off sets `data-ph-show-sponsored` on `<html>`, which disables every rule instantly. A guard never hides `.s-main-slot`/`#search`. Selectors were verified on live amazon.com.mx pages (2026-10-08) and are covered by a real-capture fixture; the per-tab badge shows how many items were hidden.
+
 ## Roadmap ideas (differentiators vs Keepa)
 
 Fake-discount detection (inflated list price before sales), review authenticity (Fakespot closed in 2025), cross-store comparison (Mercado Libre, Walmart MX, Liverpool), price-per-unit, inline history on search results, Telegram/WhatsApp alerts, best-time-to-buy prediction.

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// PostToolUse hook: formats + applies safe lint fixes to the edited file with Biome.
+// PostToolUse hook: formats the edited file with Biome. Format only — lint fixes
+// (e.g. let→const) can corrupt multi-step edits; `pnpm lint` reports those instead.
 // Never blocks: formatting problems surface later in `pnpm lint`.
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -17,7 +18,7 @@ process.stdin.on('end', () => {
     const root = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
     const biome = join(root, 'node_modules', '.bin', 'biome');
     if (FORMATTABLE.test(filePath) && existsSync(filePath) && existsSync(biome)) {
-      spawnSync(biome, ['check', '--write', '--no-errors-on-unmatched', filePath], {
+      spawnSync(biome, ['format', '--write', '--no-errors-on-unmatched', filePath], {
         cwd: root,
         stdio: 'ignore',
         timeout: 15_000,

@@ -33,15 +33,52 @@ export const SELECTORS = {
   availability: ['#availability', '#outOfStock'],
 } as const;
 
+/**
+ * Sponsored content on search pages. Verified on amazon.com.mx 2026-10-08
+ * (4 result pages, 12/60 sponsored results each, 0 false positives per signal).
+ * Keep in sync with apps/extension/src/entrypoints/search.content/sponsored.css.
+ */
+export const SPONSORED_SELECTORS = {
+  /** Units we hide: direct children of the results list, plus rail ad blocks. */
+  containers: [
+    '.s-main-slot > .s-result-item',
+    '.s-main-slot > [data-component-type="s-search-result"]',
+    '.AdHolder',
+  ],
+  /** Locale-agnostic markers on or inside a sponsored container, strongest first. */
+  markers: [
+    '.AdHolder', // results + most widgets + rail
+    '.puis-sponsored-label-text', // single results, sponsored-brand video
+    '.s-widget-sponsored-label-text', // sponsored products carousel
+    '.sponsored-brand-label-info-desktop', // sponsored-brand widgets
+    'a[href*="/sspa/click"]', // sponsored click redirect
+    '[class*="ctaSponsored"]', // hashed class on brand carousels — last resort
+  ],
+  /** Leaf elements checked for the localized "Patrocinado" text (fallback). */
+  labelCandidates: 'span, a',
+  /** Never hide these (guards against a selector ever matching the whole list). */
+  neverHide: ['.s-main-slot', '#search', '.s-search-results'],
+} as const;
+
+interface MarketplaceText {
+  decimalSeparator: '.' | ',';
+  soldByAmazon: RegExp;
+  outOfStock: RegExp;
+  inStock: RegExp;
+  /** Exact text of the sponsored label (leaf node). */
+  sponsoredLabel: RegExp;
+  /** aria-label prefix on sponsored widgets that have no AdHolder class. */
+  sponsoredAriaPrefix: string;
+}
+
 /** Locale-dependent text patterns. */
-export const MARKETPLACE_TEXT: Record<
-  MarketplaceId,
-  { decimalSeparator: '.' | ','; soldByAmazon: RegExp; outOfStock: RegExp; inStock: RegExp }
-> = {
+export const MARKETPLACE_TEXT: Record<MarketplaceId, MarketplaceText> = {
   mx: {
     decimalSeparator: '.',
     soldByAmazon: /^\s*amazon(\.com(\.mx)?)?(\s+m[eé]xico)?\s*\.?\s*$/i,
     outOfStock: /no disponible|agotado/i,
     inStock: /disponible|en existencia|quedan? s[oó]lo/i,
+    sponsoredLabel: /^\s*patrocinados?\s*$/i,
+    sponsoredAriaPrefix: 'Anuncio patrocinado',
   },
 };

@@ -11,5 +11,11 @@ export const PRODUCT_PAGE_MATCHES = Object.values(MARKETPLACES).flatMap((m) => [
   `${m.origin}/gp/aw/d/*`,
 ]);
 
+/** Search-results URL patterns per marketplace (`/s?k=…` and legacy `/s/…`). */
+export const SEARCH_PAGE_MATCHES = Object.values(MARKETPLACES).flatMap((m) => [
+  `${m.origin}/s?*`,
+  `${m.origin}/s/*`,
+]);
+
 export const PANEL_HEIGHT_PX = 430;
 export const FLUSH_ALARM = 'flush-observations';

@@ -1,0 +1,34 @@
+{
+  "name": "@repo/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "typecheck": "wxt prepare && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo/amazon-parser": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "hono": "^4.13.13",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "uplot": "^1.6.32",
+    "valibot": "^1.5.0"
+  },
+  "devDependencies": {
+    "@repo/api": "workspace:*",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@wxt-dev/module-react": "^1.2.2",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.3",
+    "wxt": "^0.21.4"
+  }
+}

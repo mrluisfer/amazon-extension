@@ -1,0 +1,20 @@
+{
+  "name": "@repo/amazon-parser",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.14.5"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "valibot": "^1.5.0"
+  }
+}

@@ -1,0 +1,16 @@
+# Normalize line endings (Biome and .editorconfig expect LF)
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff2 binary
+*.zip binary
+
+# Generated files: collapse in diffs
+pnpm-lock.yaml linguist-generated=true -diff
+packages/db/migrations/meta/*.json linguist-generated=true

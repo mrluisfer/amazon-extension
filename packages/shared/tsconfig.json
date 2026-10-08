@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Runs in both the browser and Node; Node types provide URL/Intl globals.
+    "types": ["node"]
+  },
+  "include": ["src", "test"]
+}

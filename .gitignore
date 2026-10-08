@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output & caches
+dist/
+.output/
+.wxt/
+.turbo/
+coverage/
+*.tsbuildinfo
+web-ext-artifacts/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+
+# Secrets — only .env.example files (with placeholders) are committed
+.env
+.env.*
+!.env.example
+
+# Extension signing keys (Verified CRX uploads) and other key material
+*.pem
+*.key
+*.crx
+
+# Local platform/CLI state
+.vercel/
+.neon/
+
+# Claude Code: personal overrides and worktrees stay local
+.claude/settings.local.json
+.claude/worktrees/

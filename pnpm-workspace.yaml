@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply-chain hardening: never install a version published less than 24h ago.
+# Most malicious npm releases are detected and pulled within hours.
+minimumReleaseAge: 1440
+
+# Dependency lifecycle scripts are blocked by default; allow-list explicitly.
+allowBuilds:
+  esbuild: true

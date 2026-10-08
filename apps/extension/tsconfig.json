@@ -1,0 +1,14 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    // Needed only because the type-only import of the API's AppType pulls in
+    // its Node-flavoured sources (node:crypto). No Node APIs ship in the bundle.
+    "types": ["node"]
+  }
+}

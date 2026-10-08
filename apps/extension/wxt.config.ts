@@ -49,4 +49,10 @@ export default defineConfig({
   vite: () => ({
     plugins: [tailwindcss()],
   }),
+  // `wxt dev` launches Chrome via web-ext. A persistent profile (git-ignored, under
+  // .wxt/) keeps Amazon captchas/cookies and extension storage between runs.
+  webExt: {
+    chromiumArgs: ['--user-data-dir=./.wxt/chrome-data'],
+    startUrls: [`${MARKETPLACES.mx.origin}/`],
+  },
 });

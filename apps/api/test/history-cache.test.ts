@@ -1,0 +1,72 @@
+import type { Database } from '@repo/db';
+import type { HistoryResponse } from '@repo/shared';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createApp } from '../src/app';
+import { MemoryRateLimiter } from '../src/lib/rate-limiter';
+import { generateToken } from '../src/lib/tokens';
+
+const getHistory = vi.fn<() => Promise<HistoryResponse>>();
+vi.mock('../src/services/history', () => ({ getHistory: () => getHistory() }));
+
+/** Just enough of a db for requireAuth: a valid, recently-used token. */
+const authOnlyDb = {
+  select: () => ({
+    from: () => ({
+      where: () => ({
+        limit: async () => [{ tokenId: 't1', userId: 'u1', lastUsedAt: new Date() }],
+      }),
+    }),
+  }),
+} as unknown as Database;
+
+const app = createApp({
+  db: authOnlyDb,
+  limiters: {
+    installs: new MemoryRateLimiter(10, 1),
+    api: new MemoryRateLimiter(100, 1),
+    ingest: new MemoryRateLimiter(100, 1),
+  },
+  config: { isProduction: false, allowedOrigins: [], trustProxy: false },
+});
+
+const headers = { authorization: `Bearer ${generateToken()}` };
+const url = '/v1/products/mx/B0CHX1W1XY/history?days=365';
+
+const history = (series: number[], generatedAt: string): HistoryResponse => ({
+  product: { marketplace: 'mx', asin: 'B0CHX1W1XY', title: 'x', imageUrl: null },
+  series: { amazon: [], new: series, used: [] },
+  generatedAt,
+});
+
+describe('history caching', () => {
+  beforeEach(() => getHistory.mockReset());
+
+  it('forces revalidation instead of serving stale (e.g. empty) history', async () => {
+    getHistory.mockResolvedValue(history([], '2026-10-08T00:00:00Z'));
+    const res = await app.request(url, { headers });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('private, no-cache');
+    expect(res.headers.get('etag')).toMatch(/^W\/".+"$/);
+  });
+
+  it('returns 304 when data is unchanged even if generatedAt differs', async () => {
+    getHistory.mockResolvedValueOnce(history([100, 5], '2026-10-08T00:00:00Z'));
+    const first = await app.request(url, { headers });
+    const etag = first.headers.get('etag') ?? '';
+
+    getHistory.mockResolvedValueOnce(history([100, 5], '2026-10-08T00:05:00Z'));
+    const second = await app.request(url, { headers: { ...headers, 'if-none-match': etag } });
+    expect(second.status).toBe(304);
+    expect(await second.text()).toBe('');
+  });
+
+  it('returns fresh data once new prices arrive', async () => {
+    getHistory.mockResolvedValueOnce(history([], '2026-10-08T00:00:00Z'));
+    const etag = (await app.request(url, { headers })).headers.get('etag') ?? '';
+
+    getHistory.mockResolvedValueOnce(history([100, 5], '2026-10-08T00:01:00Z'));
+    const res = await app.request(url, { headers: { ...headers, 'if-none-match': etag } });
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as HistoryResponse).series.new).toEqual([100, 5]);
+  });
+});

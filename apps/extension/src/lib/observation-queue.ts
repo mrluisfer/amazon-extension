@@ -32,6 +32,17 @@ export async function enqueueObservations(incoming: Observation[]): Promise<numb
   return incoming.length;
 }
 
+/**
+ * Flushes now if a report for this product is still queued, so the panel's
+ * history request already includes what the user is looking at.
+ */
+export async function flushIfPending(marketplace: string, asin: string): Promise<void> {
+  const queue = await observationQueueItem.getValue();
+  if (queue.some((o) => o.marketplace === marketplace && o.asin === asin)) {
+    await flushObservations();
+  }
+}
+
 let flushing: Promise<void> | null = null;
 
 /** Single-flight batch upload. Called by the periodic alarm and on threshold. */

@@ -3,7 +3,7 @@ import { defineBackground } from 'wxt/utils/define-background';
 import { api } from '@/lib/api-client';
 import { FLUSH_ALARM } from '@/lib/config';
 import { registerMessageHandlers } from '@/lib/messaging';
-import { enqueueObservations, flushObservations } from '@/lib/observation-queue';
+import { enqueueObservations, flushIfPending, flushObservations } from '@/lib/observation-queue';
 import { authTokenItem, consentItem, observationQueueItem } from '@/lib/storage';
 
 /**
@@ -15,7 +15,11 @@ export default defineBackground(() => {
     'observations:report': async ({ observations }) => ({
       queued: await enqueueObservations(observations),
     }),
-    'history:get': ({ marketplace, asin, days }) => api.history(marketplace, asin, days),
+    'history:get': async ({ marketplace, asin, days }) => {
+      // Best effort: a failed flush must not block showing the chart.
+      await flushIfPending(marketplace, asin).catch(() => {});
+      return api.history(marketplace, asin, days);
+    },
     'tracked:list': async () => (await api.listTracked()).items,
     'tracked:add': (input) => api.track(input),
     'tracked:remove': async ({ id }) => api.untrack(id),

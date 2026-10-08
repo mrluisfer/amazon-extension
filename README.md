@@ -31,6 +31,10 @@ pnpm dev:extension                               # abre Chrome con la extensión
 
 Abre cualquier producto en `https://www.amazon.com.mx/dp/...`: el panel aparece debajo del bloque principal del producto.
 
+### Si `pnpm dev:api` falla con "Bearer token … rejected"
+
+La sesión OAuth de Neon expiró. El wrapper `scripts/neon-env-run.mjs` intenta renovarla solo; si no puede, corre `neon login`. Para evitarlo del todo, crea una API key en https://console.neon.tech/app/settings/api-keys y expórtala en tu shell (`export NEON_API_KEY=…` en `~/.zshrc`) — no expira.
+
 ### Flujo por ramas (Neon branch-first)
 
 Crea una rama de Neon por cada rama de git que toque la base de datos; `pnpm db:migrate` y `pnpm dev:api` usan automáticamente la rama activa en `.neon`:

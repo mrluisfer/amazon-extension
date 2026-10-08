@@ -9,8 +9,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "neon-env run -- tsx scripts/migrate.ts",
-    "db:studio": "neon-env run -- drizzle-kit studio"
+    "db:migrate": "node ../../scripts/neon-env-run.mjs -- tsx scripts/migrate.ts",
+    "db:studio": "node ../../scripts/neon-env-run.mjs -- drizzle-kit studio"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

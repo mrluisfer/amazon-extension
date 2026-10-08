@@ -37,7 +37,7 @@ Thumbs.db
 
 # Local platform/CLI state
 .vercel/
-.neon/
+.neon
 
 # Claude Code: personal overrides and worktrees stay local
 .claude/settings.local.json

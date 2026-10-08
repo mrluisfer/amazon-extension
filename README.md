@@ -7,19 +7,21 @@ Extensión de navegador (Chrome/Firefox/Edge) con historial de precios y alertas
 ## Requisitos
 
 - Node ≥ 22 (`.nvmrc`), pnpm 12 (`corepack enable`)
-- Un proyecto en Neon con dos roles (ver `docs/security.md`)
+- Neon CLI: `npm i -g neon && neon login` (proyecto `lingering-wildflower-57049207`)
 
 ## Primeros pasos
 
 ```bash
 pnpm install
 
-# 1. Base de datos
-cp packages/db/.env.example packages/db/.env   # DATABASE_URL_MIGRATIONS (rol owner)
+# 1. Vincular Neon (escribe .neon, ignorado por git). No baja secretos a disco:
+neon link --project-id lingering-wildflower-57049207 --branch production --no-env-pull -y
+
+# 2. Base de datos — neon-env inyecta DATABASE_URL_UNPOOLED de la rama vinculada
 pnpm db:migrate
 
-# 2. API
-cp apps/api/.env.example apps/api/.env          # DATABASE_URL (rol app_runtime, pooled)
+# 3. API — neon-env inyecta DATABASE_URL; apps/api/.env solo para PORT, ALLOWED_ORIGINS…
+cp apps/api/.env.example apps/api/.env
 pnpm dev:api                                     # http://localhost:8787/health
 
 # 3. Extensión
@@ -28,6 +30,17 @@ pnpm dev:extension                               # abre Chrome con la extensión
 ```
 
 Abre cualquier producto en `https://www.amazon.com.mx/dp/...`: el panel aparece debajo del bloque principal del producto.
+
+### Flujo por ramas (Neon branch-first)
+
+Crea una rama de Neon por cada rama de git que toque la base de datos; `pnpm db:migrate` y `pnpm dev:api` usan automáticamente la rama activa en `.neon`:
+
+```bash
+neon checkout feat-alerts --create --no-env-pull   # rama aislada copy-on-write
+pnpm db:migrate && pnpm dev:api
+neon diff                                          # cambios de esquema vs. la rama padre
+neon checkout production --no-env-pull             # volver
+```
 
 ## Scripts
 

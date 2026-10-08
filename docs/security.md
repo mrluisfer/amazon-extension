@@ -35,7 +35,8 @@ Not requested on purpose: `tabs`, `scripting`, `<all_urls>`, `cookies`, `webRequ
 
 ## Database roles (Neon)
 
-- `owner` / migrator → only for `pnpm db:migrate` (`DATABASE_URL_MIGRATIONS`), never deployed with the API.
+- **Local dev today:** `neon-env run` injects the branch's default `neondb_owner` credentials at runtime (nothing written to disk). Fine for development branches; **not** for the deployed API.
+- `owner` / migrator → only for `pnpm db:migrate` (`DATABASE_URL_MIGRATIONS` override in CI), never deployed with the API.
 - `app_runtime` → used by the API (`DATABASE_URL`): `SELECT, INSERT, UPDATE, DELETE` on app tables, `USAGE` on sequences; no DDL.
 
 ```sql

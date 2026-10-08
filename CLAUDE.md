@@ -18,8 +18,14 @@ docs/               architecture.md, security.md — read before structural chan
 - `pnpm check` — lint + typecheck + tests (run before declaring work done)
 - `pnpm dev:api` / `pnpm dev:extension` — local dev (extension loads in a fresh Chrome profile)
 - `pnpm db:generate` — create a migration from `packages/db/src/schema.ts` (no DB needed)
-- `pnpm db:migrate` — apply migrations (needs `packages/db/.env`; **ask before running**)
+- `pnpm db:migrate` — apply migrations to the Neon branch pinned in `.neon` (**ask before running against `production`**)
 - Single package: `pnpm --filter @repo/api test`
+
+## Neon
+
+- Project `lingering-wildflower-57049207`, default branch `production`. Linked via `.neon` (git-ignored); infra config in `neon.ts` (`neon config plan` → `neon deploy`).
+- DB env is injected at runtime by `neon-env run` (used by `db:migrate`, `db:studio`, `dev:api`) — don't copy connection strings into files. Use `--no-env-pull` with `neon link`/`neon checkout`.
+- Branch-first: `neon checkout <feature> --create --no-env-pull` before schema work; `neon diff` before committing. Neon skills live in `.claude/skills/neon*`.
 
 ## Non-negotiable rules
 

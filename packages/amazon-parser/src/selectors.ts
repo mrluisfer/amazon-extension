@@ -60,6 +60,49 @@ export const SPONSORED_SELECTORS = {
   neverHide: ['.s-main-slot', '#search', '.s-search-results'],
 } as const;
 
+/**
+ * Sponsored content on product pages (/dp/ASIN). Verified on amazon.com.mx
+ * 2026-10-08 (4 products, 0 false positives; all ad widgets present at load).
+ * Keep in sync with apps/extension/src/entrypoints/product-sponsored.content/sponsored.css.
+ */
+export const PRODUCT_SPONSORED_SELECTORS = {
+  /** Ad placements; hide the OUTERMOST match (nested _iframe/_Feedback ids live inside). */
+  adPlacement: '[id^="ape_Detail_"]',
+  /** Whole widgets that are always sponsored ("Compra por marca", brand video). */
+  sponsoredWidgets: ['[id^="sims-discoveryAndInspiration"]'],
+  /** Markers whose nearest feature widget is sponsored (carousels, brand creatives). */
+  widgetMarkers: ['[id^="sp_detail"]', 'a[href*="aax-"]'],
+  /** A feature widget = the unit to hide for widget markers / label fallback. */
+  widget: '.celwidget[id$="_feature_div"], .celwidget[id*="_feature_div_"]',
+  /**
+   * Single-card sponsored widgets that reuse organic ids (e.g. "Productos de <marca>
+   * que los clientes compraron juntos" inside a sims-productBundle widget). Hide the
+   * card, keep the widget; skip cards that hold a carousel (handled per item).
+   */
+  sponsoredCard: '[id^="CardInstance"]',
+  sponsoredCardMarker: '.dynamicSponsoredLabelClass',
+  /** Sponsored card inside an otherwise organic carousel — hide only the card. */
+  card: 'li.a-carousel-card',
+  cardMarker: 'a[href*="/sspa/click"]',
+  /** Never hide, nor anything that contains them (ads can live inside #ppd/reviews). */
+  core: [
+    '#a-page',
+    '#dp',
+    '#dp-container',
+    '#ppd',
+    '#centerCol',
+    '#rightCol',
+    '#buybox',
+    '#desktop_buybox',
+    '#productTitle',
+    '#corePrice_feature_div',
+    '#add-to-cart-button',
+  ],
+  /** Organic widgets that may CONTAIN an ad: hide the ad inside, never the widget. */
+  protectedWidgets: ['#customer-reviews_feature_div', '[id^="sims-productBundle"]'],
+  labelCandidates: 'span, a',
+} as const;
+
 interface MarketplaceText {
   decimalSeparator: '.' | ',';
   soldByAmazon: RegExp;
@@ -78,7 +121,8 @@ export const MARKETPLACE_TEXT: Record<MarketplaceId, MarketplaceText> = {
     soldByAmazon: /^\s*amazon(\.com(\.mx)?)?(\s+m[eé]xico)?\s*\.?\s*$/i,
     outOfStock: /no disponible|agotado/i,
     inStock: /disponible|en existencia|quedan? s[oó]lo/i,
-    sponsoredLabel: /^\s*patrocinados?\s*$/i,
+    // Product pages also render the English "Sponsored Ad" label on some placements.
+    sponsoredLabel: /^\s*(patrocinad[oa]s?|sponsored(\s+ad)?)\s*$/i,
     sponsoredAriaPrefix: 'Anuncio patrocinado',
   },
 };

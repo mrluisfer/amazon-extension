@@ -1,0 +1,19 @@
+/*
+ * Product pages: injected by the manifest before the DOM is built.
+ * High-confidence rules only; the content script tags the rest (brand
+ * creatives, unknown placements) with [data-ph-sponsored].
+ * Disabled entirely when <html data-ph-show-sponsored>.
+ * Keep in sync with PRODUCT_SPONSORED_SELECTORS in packages/amazon-parser/src/selectors.ts.
+ */
+html:not([data-ph-show-sponsored])
+:is(
+  [id^="ape_Detail_"],
+  [id^="sims-discoveryAndInspiration"],
+  [id^="sims-"].celwidget:has([id^="sp_detail"]),
+  li.a-carousel-card:has(a[href*="/sspa/click"]),
+  [id^="CardInstance"]:has(.dynamicSponsoredLabelClass):not(:has(li.a-carousel-card)),
+  [data-ph-sponsored]
+) {
+  /* biome-ignore lint/complexity/noImportantStyles: must beat Amazon's own display rules */
+  display: none !important;
+}

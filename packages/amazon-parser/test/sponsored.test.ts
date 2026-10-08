@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { findSponsoredContainers, SPONSORED_ATTR } from '../src/sponsored';
+import {
+  findSponsoredContainers,
+  findSponsoredOnProductPage,
+  SPONSORED_ATTR,
+} from '../src/sponsored';
 
 function loadFixture(name: string): Document {
   const html = readFileSync(join(import.meta.dirname, 'fixtures', name), 'utf8');
@@ -59,5 +63,73 @@ describe('findSponsoredContainers (mx search)', () => {
       'text/html',
     );
     expect(ids(findSponsoredContainers(doc, 'mx'))).toEqual([]);
+  });
+});
+
+describe('findSponsoredOnProductPage (mx)', () => {
+  const unitIds = (doc: Document) => ids(findSponsoredOnProductPage(doc, 'mx'));
+
+  it('finds every sponsored unit at its most specific level', () => {
+    const doc = loadFixture('mx-product-sponsored.html');
+    expect(unitIds(doc)).toEqual(
+      [
+        'ape_Detail_hero-quick-promo_desktop_placement', // ad inside #ppd
+        'sims-simsContainer_feature_div_0', // sponsored carousel
+        'sims-simsContainer_feature_div_1', // brand creative (aax- links)
+        'sims-discoveryAndInspiration_feature_div_0', // "Compra por marca"
+        'sponsored-card', // single card in an organic carousel
+        'ape_Detail_customer-reviews-top_Glance_wrapper', // ad inside reviews
+        'CardInstanceBrandBundle', // sponsored card inside a protected bundle widget
+      ].sort(),
+    );
+  });
+
+  it('never hides product content or organic widgets that merely contain an ad', () => {
+    const doc = loadFixture('mx-product-sponsored.html');
+    const found = new Set(unitIds(doc));
+    for (const id of [
+      'a-page',
+      'dp',
+      'dp-container',
+      'ppd',
+      'centerCol',
+      'rightCol',
+      'corePrice_feature_div',
+      'sims-simsContainer_feature_div_2',
+      'organic-card',
+      'sims-productBundle_feature_div_0',
+      'sims-productBundle_feature_div_1',
+      'customer-reviews_feature_div',
+    ]) {
+      expect(found.has(id)).toBe(false);
+    }
+  });
+
+  it('skips already-tagged units and nested duplicates', () => {
+    const doc = loadFixture('mx-product-sponsored.html');
+    for (const el of findSponsoredOnProductPage(doc, 'mx')) el.setAttribute(SPONSORED_ATTR, '');
+    expect(findSponsoredOnProductPage(doc, 'mx')).toEqual([]);
+  });
+
+  it('label fallback picks the closest widget for unknown placements, but never a core block', () => {
+    const doc = new DOMParser().parseFromString(
+      `<div id="dp-container">
+         <div id="ppd"><div id="centerCol"><span>Patrocinado</span></div></div>
+         <div id="new-ad_feature_div" class="celwidget"><div><span>Sponsored Ad</span></div></div>
+       </div>`,
+      'text/html',
+    );
+    expect(unitIds(doc)).toEqual(['new-ad_feature_div']);
+  });
+
+  it('matches labels by their own text, even when the label element has children', () => {
+    const doc = new DOMParser().parseFromString(
+      `<div id="dp-container">
+         <div id="x_feature_div" class="celwidget"><span>Patrocinado <i class="info"></i></span></div>
+         <div id="y_feature_div" class="celwidget"><span>Patrocinado por fans <i></i></span></div>
+       </div>`,
+      'text/html',
+    );
+    expect(unitIds(doc)).toEqual(['x_feature_div']);
   });
 });

@@ -78,7 +78,7 @@ export function OptionsApp() {
       </section>
 
       <section className="flex flex-col gap-3 rounded-lg border border-gray-200 p-5">
-        <h2 className="text-base font-semibold">Búsquedas</h2>
+        <h2 className="text-base font-semibold">Anuncios</h2>
         <HideSponsoredToggle description />
       </section>
 

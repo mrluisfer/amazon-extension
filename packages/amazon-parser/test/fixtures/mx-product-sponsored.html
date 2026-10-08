@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  REAL capture 2026-10-08, amazon.com.mx/dp/B0D9R4GYTN + B0GR2PK79C + B0B1VMY57X, minimised/sanitised.
+  Sections marked RECONSTRUCTED are rebuilt from the same day's DOM audit (structure/ids/classes
+  as observed, content trimmed). Ids/attributes simplified; no tracking params or personal data.
+-->
+<html lang="es-MX">
+  <body>
+    <div id="a-page">
+      <div id="dp">
+        <div id="dp-container" class="a-container">
+          <div id="ppd">
+            <div id="centerCol">
+              <h1 id="productTitle">Producto de ejemplo</h1>
+              <div id="corePrice_feature_div" class="celwidget"><span class="a-price"><span class="a-offscreen">$1,499.00</span></span></div>
+              <!-- ad INSIDE #ppd: hide only this node, never #ppd -->
+              <div id="ape_Detail_hero-quick-promo_desktop_placement" class="celwidget" cel_widget_id="adplacements:Detail:hero-quick-promo">
+                <div id="ape_Detail_hero-quick-promo_desktop_placement_Feedback">
+                  <a id="af-label-primary-link-hero-quick-promo"><span id="ad-feedback-text-hero-quick-promo">Patrocinado</span></a>
+                </div>
+                <div id="ape_Detail_hero-quick-promo_desktop_iframe"></div>
+              </div>
+            </div>
+            <div id="rightCol"><div id="desktop_buybox"><input id="add-to-cart-button" type="submit" /></div></div>
+          </div>
+
+          <!-- sponsored carousel (rule A) -->
+          <div id="sims-simsContainer_feature_div_0" class="celwidget">
+            <div class="celwidget" cel_widget_id="desktop-dp-sims_SponsoredProducts" data-csa-c-slot-id="sims-container-1">
+              <div data-csa-c-slot-id="sp_detail">
+                <div id="sp_detail" class="a-carousel-container">
+                  <div id="sp_detail_heading" class="a-carousel-header-row">
+                    <h2 class="a-carousel-heading">Productos relacionados con este artículo</h2>
+                    <div class="sp_desktop_sponsored_label"><span class="sp_detail_sponsored_label">Patrocinado</span></div>
+                    <a id="sp_detail_feedbackMessage"></a>
+                  </div>
+                  <ul class="a-carousel"><li class="a-carousel-card"><a href="/sspa/click?..."><img src="" alt="" /></a></li></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECONSTRUCTED: brand creative widget (rule E) — only aax- links + ad-feedback label -->
+          <div id="sims-simsContainer_feature_div_1" class="celwidget">
+            <div class="celwidget" cel_widget_id="lifestyle-image-v4-creative-desktop-dp">
+              <span class="_ad-feedback-text-desktop">Patrocinado</span>
+              <a href="https://aax-us-east-retail-direct.amazon-adsystem.com/..."><img src="" alt="" /></a>
+            </div>
+          </div>
+
+          <!-- sponsored brand / video block (rule C) -->
+          <div id="sims-discoveryAndInspiration_feature_div_0" class="celwidget">
+            <div class="celwidget" cel_widget_id="sb-mbc-dp-desktop-card_DetailPage_0">
+              <div id="CardInstanceXXXX">
+                <span class="_ad-feedback-text-desktop">Patrocinado</span>
+                <h2>Compra por marca</h2>
+                <a href="https://aax-us-east-retail-direct.amazon-adsystem.com/..."><img src="" alt="" /></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- organic, mixed: keep widget, hide only the sponsored card (rule D) -->
+          <div id="sims-simsContainer_feature_div_2" class="celwidget">
+            <h2 class="a-carousel-heading">Los clientes que compraron este producto también compraron</h2>
+            <ul class="a-carousel">
+              <li class="a-carousel-card" id="organic-card"><a href="/dp/B0ORGANIC1"><img src="" alt="" /></a></li>
+              <li class="a-carousel-card" id="sponsored-card">
+                <div class="a-row p13n-sc-sponsored-label"><span class="_ad-feedback-text-desktop">Patrocinado</span></div>
+                <a href="/sspa/click?..."><img src="" alt="" /></a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- organic, must NOT be hidden -->
+          <div id="sims-productBundle_feature_div_0" class="celwidget">
+            <h2>Comprados juntos habitualmente</h2>
+            <a href="/dp/B0ORGANIC2"><img src="" alt="" /></a>
+          </div>
+
+          <!-- RECONSTRUCTED from B07ZZM1TQP: a sponsored single card reusing the organic
+               sims-productBundle id ("Productos de <marca> que los clientes compraron juntos").
+               Hide the card only; the widget id stays protected. -->
+          <div id="sims-productBundle_feature_div_1" class="celwidget">
+            <div class="celwidget">
+              <div id="CardInstanceBrandBundle" class="cardRoot bucket">
+                <div class="a-cardui">
+                  <h2>Productos de MarcaEjemplo que los clientes compraron juntos</h2>
+                  <div class="a-section">
+                    <div class="dynamicSponsoredLabelClass"><span class="_x1_ad-feedback-text-desktop_y2">Patrocinado <i class="a-icon a-icon-info"></i></span></div>
+                    <a href="/sspa/click?..."><img src="" alt="" /></a>
+                  </div>
+                  <a href="/sspa/click?..."><span>Este producto: Licuadora Ejemplo</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- reviews contain an ad (rule B) -> hide only the ape node, keep the widget -->
+          <div id="customer-reviews_feature_div" class="celwidget">
+            <h2>Opiniones de clientes</h2>
+            <div id="ape_Detail_customer-reviews-top_Glance_wrapper" cel_widget_id="adplacements:Detail:customer-reviews-top">
+              <div id="ad_xxxx"><span id="clickthrough-label">Sponsored Ad</span></div>
+              <span>Patrocinado</span>
+            </div>
+            <div id="review-1"><span>Excelente producto, lo recomiendo.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

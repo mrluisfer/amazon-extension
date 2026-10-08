@@ -7,11 +7,11 @@ export function HideSponsoredToggle({ description = false }: { description?: boo
   return (
     <label className="flex cursor-pointer items-start justify-between gap-3">
       <span className="flex flex-col">
-        <span className="font-medium">Ocultar resultados patrocinados</span>
+        <span className="font-medium">Ocultar contenido patrocinado</span>
         {description && (
           <span className="text-xs text-gray-600">
-            Oculta los anuncios marcados como «Patrocinado» en las búsquedas de Amazon. Se hace en
-            tu navegador; no se envía nada a nuestros servidores.
+            Oculta los anuncios marcados como «Patrocinado» en las búsquedas y en las páginas de
+            producto de Amazon. Se hace en tu navegador; no se envía nada a nuestros servidores.
           </span>
         )}
       </span>

@@ -22,7 +22,12 @@ export async function getHistory(
   >;
 
   const [product] = await db
-    .select({ id: products.id, title: products.title, imageUrl: products.imageUrl })
+    .select({
+      id: products.id,
+      title: products.title,
+      imageUrl: products.imageUrl,
+      lastObservedAt: products.lastObservedAt,
+    })
     .from(products)
     .where(and(eq(products.marketplace, marketplace), eq(products.asin, asin)))
     .limit(1);
@@ -61,7 +66,13 @@ export async function getHistory(
   for (const [type, points] of grouped) series[type] = encodeSeries(points);
 
   return {
-    product: { marketplace, asin, title: product.title, imageUrl: product.imageUrl },
+    product: {
+      marketplace,
+      asin,
+      title: product.title,
+      imageUrl: product.imageUrl,
+      lastObservedAt: product.lastObservedAt?.toISOString() ?? null,
+    },
     series,
     generatedAt: now.toISOString(),
   };

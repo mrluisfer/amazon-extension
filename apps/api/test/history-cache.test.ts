@@ -10,7 +10,13 @@ const headers = authHeaders();
 const url = '/v1/products/mx/B0CHX1W1XY/history?days=365';
 
 const history = (series: number[], generatedAt: string): HistoryResponse => ({
-  product: { marketplace: 'mx', asin: 'B0CHX1W1XY', title: 'x', imageUrl: null },
+  product: {
+    marketplace: 'mx',
+    asin: 'B0CHX1W1XY',
+    title: 'x',
+    imageUrl: null,
+    lastObservedAt: null,
+  },
   series: { amazon: [], new: series, used: [] },
   generatedAt,
 });

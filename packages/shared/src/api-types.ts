@@ -7,6 +7,8 @@ export interface HistoryResponse {
     asin: string;
     title: string | null;
     imageUrl: string | null;
+    /** Last time anyone reported a price for this product (ISO), for "última actualización". */
+    lastObservedAt: string | null;
   } | null;
   /** Encoded with `encodeSeries` — decode with `decodeSeries`. */
   series: Record<OfferType, number[]>;

@@ -40,7 +40,7 @@
 | **Corroboration for suspicious jumps** | A single install can't crash a product's price to $1. Moves ≥2× or ≤½× need 2 distinct users within 24h. |
 | **Server time for points** | Client clocks are untrusted; points stay monotonic per series. |
 | **Valibot** over Zod | Tree-shakeable, smaller in the content script bundle; Standard Schema → works with `@hono/standard-validator`. |
-| **uPlot** | Canvas, ~50 KB, handles hundreds of thousands of points; stepped paths fit price data. |
+| **uPlot** (+ React overlay) over TanStack Charts / ECharts | Canvas, ~50 KB, hundreds of thousands of points, built-in drag-zoom and series toggling; stepped paths fit price data. TanStack Charts (first release 2026-07, 1.0 on 2026-10-03, SVG by default) was too young; ECharts is heavy. Keepa-style per-series hover labels are custom in any library, so they live in a React layer portaled into uPlot's plot area (`components/PriceChart.tsx`). Full history is fetched once; ranges/zoom are client-side windows. |
 | **Anonymous tokens first** | Zero-friction install, no PII. `users.email` is reserved for adding optional login later (e.g. Better Auth) and linking the anonymous user. |
 
 ## Scaling path

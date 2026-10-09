@@ -5,7 +5,7 @@ import { createIframeUi, type IframeContentScriptUi } from 'wxt/utils/content-sc
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { PANEL_HEIGHT_PX, PRODUCT_PAGE_MATCHES } from '@/lib/config';
 import { sendMessage } from '@/lib/messaging';
-import { resolvePanelAnchor } from '@/lib/panel-anchor';
+import { keepPanelAboveKeepa, resolvePanelAnchor } from '@/lib/panel-anchor';
 
 /**
  * Runs in Chrome's isolated world on product pages only. Kept deliberately
@@ -24,6 +24,19 @@ export default defineContentScript({
     let ui: IframeContentScriptUi<void> | undefined;
     let currentAsin: string | null = null;
 
+    // Watches only the direct children of #dp-container (cheap): keeps our panel
+    // above Keepa's box when Keepa injects after us, and re-mounts if Amazon drops it.
+    const container = document.getElementById('dp-container');
+    if (container) {
+      const observer = new MutationObserver(() => {
+        if (!ui) return;
+        if (!ui.wrapper.isConnected) ui.mount();
+        else keepPanelAboveKeepa(ui.wrapper);
+      });
+      observer.observe(container, { childList: true });
+      ctx.onInvalidated(() => observer.disconnect());
+    }
+
     const render = () => {
       const page = parseProductPage(document, marketplace.id, location.href);
       if (!page || page.asin === currentAsin) return;
@@ -37,7 +50,7 @@ export default defineContentScript({
       }
 
       ui?.remove();
-      // Under the short specs table when possible (see lib/panel-anchor.ts).
+      // Same slot as Keepa — right above it when present (see lib/panel-anchor.ts).
       const anchor = resolvePanelAnchor(document);
       if (!anchor) return;
 
@@ -51,7 +64,7 @@ export default defineContentScript({
           const params = new URLSearchParams({ m: marketplace.id, asin: page.asin });
           iframe.src = `${browser.runtime.getURL('/panel.html')}#${params}`;
           iframe.title = 'Historial de precios';
-          iframe.loading = 'lazy'; // defer until near the viewport
+          iframe.loading = 'lazy'; // below the fold: load when scrolled near
           iframe.referrerPolicy = 'no-referrer';
           Object.assign(iframe.style, {
             width: '100%',
@@ -59,12 +72,13 @@ export default defineContentScript({
             border: '0',
             colorScheme: 'normal',
           });
-          wrapper.style.margin = '12px 0';
-          wrapper.dataset.phPanel = '';
+          // Match Keepa's box so both read as one stacked block (left-aligned, ≤960px).
+          Object.assign(wrapper.style, { clear: 'both', maxWidth: '960px', margin: '10px 0 0' });
+          wrapper.id = 'ph-price-panel';
         },
       });
-      // Re-mounts automatically if Amazon re-renders the anchor (e.g. variant switch).
-      ui.autoMount();
+      ui.mount();
+      keepPanelAboveKeepa(ui.wrapper);
     };
 
     render();

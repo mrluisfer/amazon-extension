@@ -32,7 +32,7 @@
 
 | Decision | Why |
 |---|---|
-| **Panel placement**: under the short specs table (`#productOverview_feature_div`) with ordered fallbacks (`lib/panel-anchor.ts`) | The image column is `position: sticky` on most layouts, and the "premium" layout (e.g. iPhone) has no `#ppd`. Mounted with WXT `autoMount` so it re-attaches if Amazon re-renders the anchor. |
+| **Panel placement**: same slot as Keepa — after `#hover-zoom-end` (end of the above-the-fold block on every layout), directly above `#keepaContainer` when Keepa is installed (`lib/panel-anchor.ts`) | Users already know that position; both extensions coexist stacked, ours on top. Keepa injects ~50–100 ms after DCL, so a childList-only observer on `#dp-container` moves *our* node back above Keepa (never Keepa's). Box matches Keepa's: left-aligned, ≤960px, 10px top margin. |
 | **Iframe panel** instead of injecting React into Amazon's DOM | Full CSS/JS isolation, out-of-process rendering (doesn't slow Amazon), page can't read our UI, heavy code (React, uPlot) never loads in the content script. Same approach as Keepa. |
 | **Background is the only API client** | One place holds the token, validates, rate-limits and batches. Content scripts' `fetch` would also be subject to Amazon's CORS/CSP. |
 | **Change-only price history** (`price_points`) | A row only when the price changes → orders of magnitude less storage than one row per observation. Raw reports are kept separately (`price_observations`) for corroboration and reprocessing, with retention. |

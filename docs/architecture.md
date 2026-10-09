@@ -32,6 +32,7 @@
 
 | Decision | Why |
 |---|---|
+| **Panel placement**: under the short specs table (`#productOverview_feature_div`) with ordered fallbacks (`lib/panel-anchor.ts`) | The image column is `position: sticky` on most layouts, and the "premium" layout (e.g. iPhone) has no `#ppd`. Mounted with WXT `autoMount` so it re-attaches if Amazon re-renders the anchor. |
 | **Iframe panel** instead of injecting React into Amazon's DOM | Full CSS/JS isolation, out-of-process rendering (doesn't slow Amazon), page can't read our UI, heavy code (React, uPlot) never loads in the content script. Same approach as Keepa. |
 | **Background is the only API client** | One place holds the token, validates, rate-limits and batches. Content scripts' `fetch` would also be subject to Amazon's CORS/CSP. |
 | **Change-only price history** (`price_points`) | A row only when the price changes → orders of magnitude less storage than one row per observation. Raw reports are kept separately (`price_observations`) for corroboration and reprocessing, with retention. |

@@ -5,8 +5,7 @@ import { createIframeUi, type IframeContentScriptUi } from 'wxt/utils/content-sc
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { PANEL_HEIGHT_PX, PRODUCT_PAGE_MATCHES } from '@/lib/config';
 import { sendMessage } from '@/lib/messaging';
-
-const ANCHORS = ['#ppd', '#dp-container', '#dp'];
+import { resolvePanelAnchor } from '@/lib/panel-anchor';
 
 /**
  * Runs in Chrome's isolated world on product pages only. Kept deliberately
@@ -38,14 +37,15 @@ export default defineContentScript({
       }
 
       ui?.remove();
-      const anchor = ANCHORS.map((s) => document.querySelector(s)).find(Boolean);
+      // Under the short specs table when possible (see lib/panel-anchor.ts).
+      const anchor = resolvePanelAnchor(document);
       if (!anchor) return;
 
       ui = createIframeUi(ctx, {
         page: '/panel.html',
         position: 'inline',
-        anchor,
-        append: 'after',
+        anchor: anchor.selector,
+        append: anchor.append,
         onBeforeMount: (wrapper, iframe) => {
           // Fragment never leaves the browser and doesn't affect resource matching.
           const params = new URLSearchParams({ m: marketplace.id, asin: page.asin });
@@ -59,10 +59,12 @@ export default defineContentScript({
             border: '0',
             colorScheme: 'normal',
           });
-          wrapper.style.margin = '16px 0';
+          wrapper.style.margin = '12px 0';
+          wrapper.dataset.phPanel = '';
         },
       });
-      ui.mount();
+      // Re-mounts automatically if Amazon re-renders the anchor (e.g. variant switch).
+      ui.autoMount();
     };
 
     render();

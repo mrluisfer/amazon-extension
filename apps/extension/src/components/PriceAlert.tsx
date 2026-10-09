@@ -49,7 +49,7 @@ export function PriceAlert({ marketplace, asin }: Props) {
   } else if (status.data.item && !editing) {
     const item = status.data.item;
     content = (
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="text-gray-700">
           🔔 Te avisaremos si baja de{' '}
           <strong>
@@ -87,7 +87,7 @@ export function PriceAlert({ marketplace, asin }: Props) {
   }
 
   return (
-    <div className="mt-auto flex min-h-9 items-center gap-2 border-t border-gray-100 pt-2 text-xs">
+    <div className="mt-auto flex min-h-9 flex-wrap items-center gap-2 border-t border-gray-100 pt-2 text-xs">
       {content}
       <span aria-live="polite" className="text-red-700">
         {error}
@@ -114,7 +114,7 @@ function PriceForm({
 
   return (
     <form
-      className="flex items-center gap-2"
+      className="flex flex-wrap items-center gap-2"
       onSubmit={async (e) => {
         e.preventDefault();
         if (cents === null || saving) return;

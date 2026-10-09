@@ -11,10 +11,12 @@ import * as v from 'valibot';
 import { ChartLegend, RangeSelector } from '@/components/ChartSidebar';
 import { PriceAlert } from '@/components/PriceAlert';
 import { PriceChart, type XWindow } from '@/components/PriceChart';
+import { SettingsPanel } from '@/components/SettingsPanel';
 import { alignSeries, decodeAll } from '@/lib/chart-data';
 import { formatRelative } from '@/lib/chart-format';
 import { RANGES, type RangeOption, rangeWindow, SERIES, spanDays } from '@/lib/chart-series';
 import { sendMessage } from '@/lib/messaging';
+import { useTheme } from '@/lib/theme';
 import { useAsync } from '@/lib/use-async';
 
 /** Full history is fetched once; ranges and zoom are instant client-side windows. */
@@ -34,7 +36,7 @@ const allTrue = () =>
 
 export function PanelApp() {
   const params = useMemo(readParams, []);
-  if (!params) return <p className="p-4 text-sm text-red-700">Producto no válido.</p>;
+  if (!params) return <p className="p-4 text-sm text-danger">Producto no válido.</p>;
   return <Panel {...params} />;
 }
 
@@ -48,6 +50,8 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
   const [zoom, setZoom] = useState<XWindow | null>(null);
   const [visible, setVisible] = useState(allTrue);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [tab, setTab] = useState<'history' | 'settings'>('history');
+  const theme = useTheme();
 
   const chart = useMemo(() => {
     if (state.status !== 'success') return null;
@@ -104,93 +108,130 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
   const lastObservedAt = state.status === 'success' ? state.data.product?.lastObservedAt : null;
 
   return (
-    <div className="flex h-screen flex-col gap-1.5 rounded-lg border border-gray-200 p-3 font-sans text-xs">
-      <header className="flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold text-gray-900">Historial de precios</h2>
-        {lastObservedAt && (
-          <span className="text-gray-500">
+    <div className="flex h-screen flex-col gap-1.5 rounded-lg border border-line p-3 font-sans text-xs">
+      <header className="flex items-end justify-between border-b border-line">
+        <div role="tablist" aria-label="Panel" className="-mb-px flex">
+          {(
+            [
+              ['history', 'Historial de precios'],
+              ['settings', 'Ajustes'],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              id={`tab-${key}`}
+              aria-selected={tab === key}
+              aria-controls={`tabpanel-${key}`}
+              onClick={() => setTab(key)}
+              className="border-b-2 border-transparent px-2.5 pb-1 text-sm text-fg-muted hover:text-fg aria-selected:border-brand aria-selected:font-semibold aria-selected:text-fg"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {tab === 'history' && lastObservedAt && (
+          <span className="pb-1 text-fg-muted">
             (última actualización: {formatRelative(lastObservedAt, marketplace)})
           </span>
         )}
       </header>
 
-      {state.status === 'loading' && (
-        <div className="h-[330px] animate-pulse rounded bg-gray-100" />
-      )}
+      <section
+        role="tabpanel"
+        id="tabpanel-settings"
+        aria-labelledby="tab-settings"
+        hidden={tab !== 'settings'}
+        className="overflow-y-auto"
+      >
+        <SettingsPanel pref={theme.pref} resolved={theme.resolved} onChange={theme.setPref} />
+      </section>
 
-      {state.status === 'error' && (
-        <div className="flex h-[330px] flex-col items-center justify-center gap-2 text-sm text-gray-600">
-          <p>No pudimos cargar el historial.</p>
-          <button
-            type="button"
-            onClick={reload}
-            className="rounded border px-3 py-1 text-xs hover:bg-gray-50"
-          >
-            Reintentar
-          </button>
-        </div>
-      )}
+      {/* Kept mounted while hidden so range/zoom/toggles survive switching tabs. */}
+      <section
+        role="tabpanel"
+        id="tabpanel-history"
+        aria-labelledby="tab-history"
+        hidden={tab !== 'history'}
+        className="flex min-h-0 flex-1 flex-col gap-1.5"
+      >
+        {state.status === 'loading' && (
+          <div className="h-[330px] animate-pulse rounded bg-surface-3" />
+        )}
 
-      {state.status === 'success' && !hasData && (
-        <div className="flex h-[330px] items-center justify-center px-6 text-center text-sm text-gray-600">
-          Aún no hay historial para este producto. Se construye con los precios que la comunidad
-          comparte.
-        </div>
-      )}
-
-      {state.status === 'success' && chart && hasData && (
-        <div className="flex min-h-0 gap-4">
-          <div className="min-w-0 flex-1">
-            <PriceChart
-              data={chart.aligned}
-              marketplace={marketplace}
-              visible={visible}
-              window={xWindow}
-              onZoom={(w) => {
-                setZoom(w);
-                setRange(null);
-              }}
-              onResetZoom={() => selectRange(lastRange.current)}
-              onHover={setHoverIdx}
-            />
-            <p className="mt-7 text-[10px] leading-snug text-gray-500">
-              Selecciona un área para acercar · doble clic para restablecer · haz clic en la leyenda
-              para mostrar u ocultar datos
-            </p>
+        {state.status === 'error' && (
+          <div className="flex h-[330px] flex-col items-center justify-center gap-2 text-sm text-fg-muted">
+            <p>No pudimos cargar el historial.</p>
+            <button
+              type="button"
+              onClick={reload}
+              className="rounded border border-line-strong px-3 py-1 text-xs hover:bg-surface-2"
+            >
+              Reintentar
+            </button>
           </div>
-          <aside className="flex w-52 shrink-0 flex-col gap-3 pt-1">
-            <ChartLegend
-              marketplace={marketplace}
-              visible={visible}
-              available={chart.available}
-              values={values}
-              onToggle={(key) => setVisible((prev) => ({ ...prev, [key]: !prev[key] }))}
-            />
-            <RangeSelector
-              active={range?.key ?? null}
-              totalDays={chart.totalDays}
-              onSelect={selectRange}
-            />
-            {stats?.series && (
-              <dl className="grid grid-cols-[auto_1fr] gap-x-2 text-gray-600">
-                <dt>Mínimo</dt>
-                <dd className="tabular-nums text-gray-900">
-                  {formatPrice(stats.min, marketplace)}
-                </dd>
-                <dt>Máximo</dt>
-                <dd className="tabular-nums text-gray-900">
-                  {formatPrice(stats.max, marketplace)}
-                </dd>
-                <dd className="col-span-2 text-[10px] text-gray-400">
-                  {stats.series.label}, rango visible
-                </dd>
-              </dl>
-            )}
-          </aside>
-        </div>
-      )}
+        )}
 
-      <PriceAlert marketplace={marketplace} asin={asin} />
+        {state.status === 'success' && !hasData && (
+          <div className="flex h-[330px] items-center justify-center px-6 text-center text-sm text-fg-muted">
+            Aún no hay historial para este producto. Se construye con los precios que la comunidad
+            comparte.
+          </div>
+        )}
+
+        {state.status === 'success' && chart && hasData && (
+          <div className="flex min-h-0 gap-4">
+            <div className="min-w-0 flex-1">
+              <PriceChart
+                data={chart.aligned}
+                marketplace={marketplace}
+                visible={visible}
+                window={xWindow}
+                onZoom={(w) => {
+                  setZoom(w);
+                  setRange(null);
+                }}
+                onResetZoom={() => selectRange(lastRange.current)}
+                onHover={setHoverIdx}
+                theme={theme.resolved}
+              />
+              <p className="mt-6 text-[10px] leading-snug text-fg-muted">
+                Selecciona un área para acercar · doble clic para restablecer · haz clic en la
+                leyenda para mostrar u ocultar datos
+              </p>
+            </div>
+            <aside className="flex w-52 shrink-0 flex-col gap-3 pt-1">
+              <ChartLegend
+                marketplace={marketplace}
+                visible={visible}
+                available={chart.available}
+                values={values}
+                onToggle={(key) => setVisible((prev) => ({ ...prev, [key]: !prev[key] }))}
+                theme={theme.resolved}
+              />
+              <RangeSelector
+                active={range?.key ?? null}
+                totalDays={chart.totalDays}
+                onSelect={selectRange}
+              />
+              {stats?.series && (
+                <dl className="grid grid-cols-[auto_1fr] gap-x-2 text-fg-muted">
+                  <dt>Mínimo</dt>
+                  <dd className="tabular-nums text-fg">{formatPrice(stats.min, marketplace)}</dd>
+                  <dt>Máximo</dt>
+                  <dd className="tabular-nums text-fg">{formatPrice(stats.max, marketplace)}</dd>
+                  <dd className="col-span-2 text-[10px] text-fg-subtle">
+                    {stats.series.label}, rango visible
+                  </dd>
+                </dl>
+              )}
+            </aside>
+          </div>
+        )}
+
+        <PriceAlert marketplace={marketplace} asin={asin} />
+      </section>
     </div>
   );
 }

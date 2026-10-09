@@ -9,7 +9,8 @@ import {
   formatCursorDate,
   layoutTooltips,
 } from '@/lib/chart-format';
-import { SERIES } from '@/lib/chart-series';
+import { CHART_PALETTE, seriesFor } from '@/lib/chart-series';
+import type { Theme } from '@/lib/theme';
 
 export type XWindow = { min: number; max: number };
 
@@ -25,6 +26,8 @@ interface Props {
   onResetZoom: () => void;
   /** Hovered data index (null when the cursor leaves). */
   onHover: (idx: number | null) => void;
+  /** Resolved theme: canvas colors can't come from CSS, so the plot is rebuilt on change. */
+  theme: Theme;
   height?: number;
 }
 
@@ -57,17 +60,21 @@ export function PriceChart({
   onZoom,
   onResetZoom,
   onHover,
-  height = 300,
+  theme,
+  height = 282,
 }: Props) {
+  const series = seriesFor(theme);
+  const palette = CHART_PALETTE[theme];
   const rootRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
   const [overEl, setOverEl] = useState<HTMLElement | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
 
   // Latest callbacks without re-creating the plot.
-  const cb = useRef({ onZoom, onResetZoom, onHover, visible });
-  cb.current = { onZoom, onResetZoom, onHover, visible };
+  const cb = useRef({ onZoom, onResetZoom, onHover, visible, window });
+  cb.current = { onZoom, onResetZoom, onHover, visible, window };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: series/palette derive from `theme`
   useLayoutEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -87,7 +94,7 @@ export function PriceChart({
       },
       series: [
         {},
-        ...SERIES.map((s) => ({
+        ...series.map((s) => ({
           label: s.label,
           stroke: s.color,
           fill: s.fill,
@@ -109,15 +116,15 @@ export function PriceChart({
       ],
       axes: [
         {
-          stroke: '#6b7280',
-          grid: { stroke: '#eef0f3' },
-          ticks: { stroke: '#e5e7eb' },
+          stroke: palette.axis,
+          grid: { stroke: palette.grid },
+          ticks: { stroke: palette.tick },
           values: (_u, splits) => splits.map((s) => formatAxisDate(s, marketplace)),
         },
         {
-          stroke: '#6b7280',
-          grid: { stroke: '#eef0f3' },
-          ticks: { stroke: '#e5e7eb' },
+          stroke: palette.axis,
+          grid: { stroke: palette.grid },
+          ticks: { stroke: palette.tick },
           size: 70,
           values: (_u, splits) => splits.map((s) => formatAxisPrice(s, marketplace)),
         },
@@ -126,7 +133,7 @@ export function PriceChart({
         y: false,
         // We own the x scale (controlled `window`); a drag only reports the selection.
         drag: { x: true, y: false, setScale: false },
-        points: { size: 8, width: 2, fill: '#fff' },
+        points: { size: 8, width: 2, fill: palette.point },
         bind: {
           dblclick: () => () => {
             cb.current.onResetZoom();
@@ -154,7 +161,7 @@ export function PriceChart({
             }
             const xs = u.data[0];
             const items: HoverState['items'] = [];
-            SERIES.forEach((s, i) => {
+            series.forEach((s, i) => {
               const v = u.data[i + 1]?.[idx];
               if (v == null || !u.series[i + 1]?.show) return;
               items.push({
@@ -179,6 +186,8 @@ export function PriceChart({
 
     const plot = new uPlot(opts, data, el);
     plotRef.current = plot;
+    // A rebuilt plot (e.g. theme change) must keep the selected range/zoom.
+    if (cb.current.window) plot.setScale('x', cb.current.window);
     setOverEl(plot.over);
     const ro = new ResizeObserver(() => plot.setSize({ width: el.clientWidth, height }));
     ro.observe(el);
@@ -189,7 +198,7 @@ export function PriceChart({
       setOverEl(null);
       setHover(null);
     };
-  }, [data, marketplace, height]);
+  }, [data, marketplace, height, theme]);
 
   // Controlled x window (range buttons / reset).
   useEffect(() => {
@@ -200,10 +209,11 @@ export function PriceChart({
   }, [window, data]);
 
   // Series visibility (legend toggles).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: series order/keys are static
   useEffect(() => {
     const plot = plotRef.current;
     if (!plot) return;
-    SERIES.forEach((s, i) => {
+    series.forEach((s, i) => {
       if (plot.series[i + 1]?.show !== visible[s.key])
         plot.setSeries(i + 1, { show: visible[s.key] });
     });
@@ -242,7 +252,8 @@ function HoverLayer({
             y1={p.y}
             x2={onRight ? boxLeft : boxLeft + TOOLTIP_W}
             y2={p.top + TOOLTIP_H / 2}
-            stroke="#9ca3af"
+            // CSS variables only resolve in `style`, not in SVG presentation attributes.
+            style={{ stroke: 'var(--color-fg-subtle)' }}
             strokeWidth={1}
           />
         ))}
@@ -257,18 +268,18 @@ function HoverLayer({
             width: TOOLTIP_W,
             height: TOOLTIP_H,
             borderColor: p.color,
-            // Opaque: a light tint of the series color over white, so lines don't show through.
-            background: `linear-gradient(${p.color}1f, ${p.color}1f), #fff`,
+            // Opaque: a tint of the series color over the surface, so lines don't show through.
+            background: `linear-gradient(${p.color}26, ${p.color}26), var(--color-surface)`,
           }}
         >
-          <div className="text-[10px] text-gray-600">{p.label}</div>
-          <div className="text-[12px] font-semibold text-gray-900">
+          <div className="text-[10px] text-fg-muted">{p.label}</div>
+          <div className="text-[12px] font-semibold text-fg">
             {formatPrice(p.value, marketplace)}
           </div>
         </div>
       ))}
       <div
-        className="absolute whitespace-nowrap rounded-sm border border-gray-300 bg-white px-1.5 py-0.5 text-[11px] text-gray-800 shadow-sm"
+        className="absolute whitespace-nowrap rounded-sm border border-line-strong bg-surface px-1.5 py-0.5 text-[11px] text-fg-2 shadow-sm"
         style={{
           // Below the x-axis labels, like Keepa.
           top: hover.plotHeight + 30,

@@ -9,7 +9,7 @@ export function HideSponsoredToggle({ description = false }: { description?: boo
       <span className="flex flex-col">
         <span className="font-medium">Ocultar contenido patrocinado</span>
         {description && (
-          <span className="text-xs text-gray-600">
+          <span className="text-xs text-fg-muted">
             Oculta los anuncios marcados como «Patrocinado» en las búsquedas y en las páginas de
             producto de Amazon. Se hace en tu navegador; no se envía nada a nuestros servidores.
           </span>

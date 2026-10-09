@@ -37,12 +37,12 @@ export function PriceAlert({ marketplace, asin }: Props) {
 
   let content: React.ReactNode = null;
   if (status.status === 'loading') {
-    content = <div className="h-6 w-56 animate-pulse rounded bg-gray-100" />;
+    content = <div className="h-6 w-56 animate-pulse rounded bg-surface-3" />;
   } else if (status.status === 'error') {
-    content = <span className="text-gray-500">Avisos de precio no disponibles por ahora.</span>;
+    content = <span className="text-fg-muted">Avisos de precio no disponibles por ahora.</span>;
   } else if (!status.data.hasAccount) {
     content = (
-      <span className="text-gray-600">
+      <span className="text-fg-muted">
         🔔 Inicia sesión para recibir un aviso cuando este producto baje de precio.
       </span>
     );
@@ -50,19 +50,19 @@ export function PriceAlert({ marketplace, asin }: Props) {
     const item = status.data.item;
     content = (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-gray-700">
+        <span className="text-fg-2">
           🔔 Te avisaremos si baja de{' '}
           <strong>
             {item.targetPriceCents != null ? formatPrice(item.targetPriceCents, marketplace) : '—'}
           </strong>
         </span>
-        <button type="button" onClick={() => setEditing(true)} className="text-gray-600 underline">
+        <button type="button" onClick={() => setEditing(true)} className="text-fg-muted underline">
           Cambiar
         </button>
         <button
           type="button"
           onClick={() => void run(() => sendMessage('tracked:remove', { id: item.id }))}
-          className="text-gray-500 hover:text-red-600"
+          className="text-fg-muted hover:text-danger"
         >
           Dejar de seguir
         </button>
@@ -87,9 +87,9 @@ export function PriceAlert({ marketplace, asin }: Props) {
   }
 
   return (
-    <div className="mt-auto flex min-h-9 flex-wrap items-center gap-2 border-t border-gray-100 pt-2 text-xs">
+    <div className="mt-auto flex min-h-9 flex-wrap items-center gap-2 border-t border-line pt-2 text-xs">
       {content}
-      <span aria-live="polite" className="text-red-700">
+      <span aria-live="polite" className="text-danger">
         {error}
       </span>
     </div>
@@ -123,7 +123,7 @@ function PriceForm({
         setSaving(false);
       }}
     >
-      <label htmlFor="target" className="text-gray-600">
+      <label htmlFor="target" className="text-fg-muted">
         Avísame si baja de
       </label>
       <input
@@ -133,7 +133,7 @@ function PriceForm({
         value={value}
         onChange={(e) => setValue(e.target.value.replace(/[^\d.,$\s]/g, ''))}
         aria-invalid={invalid}
-        className="w-24 rounded border border-gray-300 px-2 py-1 aria-invalid:border-red-400"
+        className="w-24 rounded border border-line-strong px-2 py-1 aria-invalid:border-danger"
       />
       <button
         type="submit"
@@ -144,11 +144,11 @@ function PriceForm({
         {submitLabel}
       </button>
       {onCancel && (
-        <button type="button" onClick={onCancel} className="text-gray-500 underline">
+        <button type="button" onClick={onCancel} className="text-fg-muted underline">
           Cancelar
         </button>
       )}
-      {invalid && <span className="text-red-700">Precio no válido</span>}
+      {invalid && <span className="text-danger">Precio no válido</span>}
     </form>
   );
 }

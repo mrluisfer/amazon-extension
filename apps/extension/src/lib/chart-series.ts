@@ -1,28 +1,67 @@
 import type { SeriesType } from '@repo/shared';
 
-export interface SeriesMeta {
+import type { Theme } from './theme';
+
+type Themed<T> = Record<Theme, T>;
+
+interface SeriesDef {
   key: SeriesType;
   label: string;
-  color: string;
+  color: Themed<string>;
   /** Area fill under the line (Keepa fills the Amazon series). */
-  fill?: string;
+  fill?: Themed<string>;
   /** Dashed reference lines (list price). */
   dash?: number[];
   width?: number;
 }
 
+export interface SeriesMeta extends Omit<SeriesDef, 'color' | 'fill'> {
+  color: string;
+  fill?: string;
+}
+
 /**
- * Order = uPlot series order (index + 1). Colors follow Keepa's conventions so
- * users switching from it read the chart instantly.
+ * Order = uPlot series order (index + 1). Light colors follow Keepa's
+ * conventions so users switching from it read the chart instantly; dark
+ * variants are brighter so they keep contrast on the dark surface.
  * Note: our "new" observation is the buy-box price, hence "Caja de compra".
  */
-export const SERIES: readonly SeriesMeta[] = [
-  { key: 'amazon', label: 'Amazon', color: '#f39c12', fill: 'rgba(243, 156, 18, 0.14)' },
-  { key: 'new', label: 'Caja de compra', color: '#e0249a' },
-  { key: 'used', label: 'Usado', color: '#374151' },
+const SERIES_DEFS: readonly SeriesDef[] = [
+  {
+    key: 'amazon',
+    label: 'Amazon',
+    color: { light: '#f39c12', dark: '#f5a524' },
+    fill: { light: 'rgba(243, 156, 18, 0.14)', dark: 'rgba(245, 165, 36, 0.16)' },
+  },
+  { key: 'new', label: 'Caja de compra', color: { light: '#e0249a', dark: '#f0479f' } },
+  { key: 'used', label: 'Usado', color: { light: '#374151', dark: '#d4d4d8' } },
   // Reference, not a selling price: thin dashed grey, like Keepa's "Lista de precio".
-  { key: 'list', label: 'Precio de lista', color: '#9ca3af', dash: [6, 4], width: 1.5 },
+  {
+    key: 'list',
+    label: 'Precio de lista',
+    color: { light: '#9ca3af', dark: '#71717a' },
+    dash: [6, 4],
+    width: 1.5,
+  },
 ];
+
+const resolve = (theme: Theme): SeriesMeta[] =>
+  SERIES_DEFS.map((d) => ({ ...d, color: d.color[theme], fill: d.fill?.[theme] }));
+const RESOLVED: Themed<SeriesMeta[]> = { light: resolve('light'), dark: resolve('dark') };
+
+/** Series with colors for the given theme (stable references per theme). */
+export function seriesFor(theme: Theme): readonly SeriesMeta[] {
+  return RESOLVED[theme];
+}
+
+/** Light series — for code that only needs keys/labels/order. */
+export const SERIES: readonly SeriesMeta[] = RESOLVED.light;
+
+/** Canvas colors (uPlot draws axes/grid itself; CSS can't reach them). */
+export const CHART_PALETTE: Themed<{ axis: string; grid: string; tick: string; point: string }> = {
+  light: { axis: '#6b7280', grid: '#eef0f3', tick: '#e5e7eb', point: '#ffffff' },
+  dark: { axis: '#a1a1aa', grid: '#2a2a2f', tick: '#3f3f46', point: '#18181b' },
+};
 
 export interface RangeOption {
   key: 'week' | 'month' | 'quarter' | 'year' | 'all';

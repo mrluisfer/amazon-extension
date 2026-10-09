@@ -1,15 +1,48 @@
 @import "tailwindcss";
 
+/*
+ * Theming without JavaScript: every semantic color is `light-dark(light, dark)`,
+ * resolved by the root `color-scheme`. "Sistema" just means `color-scheme: light
+ * dark` → the OS preference applies with zero listeners or re-renders.
+ * Pages that never set data-theme (popup, options) stay light.
+ */
 @theme {
   --color-brand: #e8710a;
-  --color-series-amazon: #e8710a;
-  --color-series-new: #2563eb;
-  --color-series-used: #6b7280;
+  --color-surface: light-dark(#ffffff, #18181b);
+  --color-surface-2: light-dark(#f9fafb, #232327);
+  --color-surface-3: light-dark(#f3f4f6, #2e2e33);
+  --color-fg: light-dark(#111827, #f4f4f5);
+  --color-fg-2: light-dark(#374151, #d4d4d8);
+  --color-fg-muted: light-dark(#6b7280, #a1a1aa);
+  --color-fg-subtle: light-dark(#9ca3af, #71717a);
+  --color-line: light-dark(#e5e7eb, #3f3f46);
+  --color-line-strong: light-dark(#d1d5db, #52525b);
+  --color-danger: light-dark(#b91c1c, #f87171);
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+:root[data-theme="system"] {
+  color-scheme: light dark;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 html,
 body {
-  background: white;
-  color: var(--color-gray-900);
+  background: var(--color-surface);
+  color: var(--color-fg);
+}
+
+/* uPlot DOM bits (the canvas itself is themed from JS, see lib/theme.ts). */
+.u-cursor-x {
+  /* biome-ignore lint/complexity/noImportantStyles: uPlot sets these inline */
+  border-right-color: var(--color-fg-muted) !important;
+}
+.u-select {
+  /* biome-ignore lint/complexity/noImportantStyles: uPlot sets these inline */
+  background: light-dark(rgba(17, 24, 39, 0.07), rgba(244, 244, 245, 0.1)) !important;
 }

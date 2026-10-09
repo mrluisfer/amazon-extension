@@ -24,6 +24,14 @@ export const hideSponsoredItem = storage.defineItem<boolean>('local:hideSponsore
   version: 1,
 });
 
+export type ThemePref = 'system' | 'light' | 'dark';
+
+/** Theme of our own UI (the panel). Amazon has no dark mode; ours follows the OS by default. */
+export const themeItem = storage.defineItem<ThemePref>('local:theme', {
+  fallback: 'system',
+  version: 1,
+});
+
 /** Pending crowdsourced observations, flushed in batches by the background. */
 export const observationQueueItem = storage.defineItem<Observation[]>('local:observationQueue', {
   fallback: [],

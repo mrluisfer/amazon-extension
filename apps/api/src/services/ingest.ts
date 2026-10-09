@@ -1,5 +1,5 @@
 import { type Database, priceObservations, pricePoints, products } from '@repo/db';
-import type { Observation, OfferType } from '@repo/shared';
+import type { Observation, SeriesType } from '@repo/shared';
 import { and, countDistinct, desc, eq, gt, ne, sql } from 'drizzle-orm';
 
 /** A price move beyond this factor (either direction) needs corroboration. */
@@ -52,6 +52,34 @@ export function dedupeBatch(observations: readonly Observation[]): Observation[]
   return [...byKey.values()];
 }
 
+/** A unit of ingestion: an observation for one series (offer types + derived list price). */
+export type IngestItem = Omit<Observation, 'offerType'> & { offerType: SeriesType };
+
+/**
+ * Dedupes the batch and derives the "Precio de lista" series: one `list` item
+ * per product, taken from the buy-box (`new`) report, else the `amazon` one.
+ * A missing list price is ignored rather than recorded as a gap — most products
+ * don't show one, and a selector miss must not erase the line.
+ */
+export function expandBatch(observations: readonly Observation[]): IngestItem[] {
+  const items: IngestItem[] = dedupeBatch(observations);
+  const listByProduct = new Map<string, Observation>();
+  for (const o of items) {
+    if (o.offerType === 'list' || o.listPriceCents == null) continue;
+    const key = `${o.marketplace}:${o.asin}`;
+    if (o.offerType === 'new' || !listByProduct.has(key)) listByProduct.set(key, o as Observation);
+  }
+  for (const o of listByProduct.values()) {
+    items.push({
+      ...o,
+      offerType: 'list',
+      priceCents: o.listPriceCents ?? null,
+      listPriceCents: null,
+    });
+  }
+  return items;
+}
+
 export type IngestSummary = Record<Decision, number>;
 
 export async function ingestBatch(
@@ -63,7 +91,7 @@ export async function ingestBatch(
   const summary: IngestSummary = { accepted: 0, duplicate: 0, pending: 0, rejected: 0 };
 
   await db.transaction(async (tx) => {
-    for (const obs of dedupeBatch(batch)) {
+    for (const obs of expandBatch(batch)) {
       const observedAt = new Date(obs.observedAt);
       const [product] = await tx
         .insert(products)
@@ -128,7 +156,7 @@ type Tx = Parameters<Parameters<Database['transaction']>[0]>[0];
 async function lastPrice(
   tx: Tx,
   productId: number,
-  offerType: OfferType,
+  offerType: SeriesType,
 ): Promise<number | null | undefined> {
   const [row] = await tx
     .select({ priceCents: pricePoints.priceCents })
@@ -142,7 +170,7 @@ async function lastPrice(
 async function countCorroborations(
   tx: Tx,
   productId: number,
-  obs: Observation,
+  obs: IngestItem,
   userId: string,
   now: Date,
 ): Promise<number> {

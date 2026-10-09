@@ -1,6 +1,11 @@
 import type { Observation } from '@repo/shared';
 import { describe, expect, it, vi } from 'vitest';
-import { decideObservation, dedupeBatch, isObservationFresh } from '../src/services/ingest';
+import {
+  decideObservation,
+  dedupeBatch,
+  expandBatch,
+  isObservationFresh,
+} from '../src/services/ingest';
 
 const never = () => Promise.reject(new Error('should not query corroborations'));
 
@@ -71,5 +76,36 @@ describe('dedupeBatch', () => {
       { ...base, offerType: 'used', priceCents: 50 },
     ];
     expect(dedupeBatch(batch).map((o) => o.priceCents)).toEqual([200, 50]);
+  });
+});
+
+describe('expandBatch (list price series)', () => {
+  const base = {
+    marketplace: 'mx',
+    asin: 'B0CHX1W1XY',
+    availability: 'unknown',
+    observedAt: '2026-10-08T00:00:00Z',
+  } as const;
+
+  it('derives one "list" item per product, preferring the buy-box report', () => {
+    const items = expandBatch([
+      { ...base, offerType: 'amazon', priceCents: 1000, listPriceCents: 1500 },
+      { ...base, offerType: 'new', priceCents: 1000, listPriceCents: 1499 },
+      { ...base, offerType: 'used', priceCents: 700, listPriceCents: null },
+    ]);
+    const list = items.filter((i) => i.offerType === 'list');
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ offerType: 'list', priceCents: 1499, listPriceCents: null });
+    expect(items).toHaveLength(4);
+  });
+
+  it('falls back to the Amazon report and ignores products without a list price', () => {
+    const items = expandBatch([
+      { ...base, offerType: 'amazon', priceCents: 1000, listPriceCents: 1500 },
+      { ...base, asin: 'B0OTHER000', offerType: 'new', priceCents: 900 },
+    ]);
+    expect(items.filter((i) => i.offerType === 'list').map((i) => [i.asin, i.priceCents])).toEqual([
+      ['B0CHX1W1XY', 1500],
+    ]);
   });
 });

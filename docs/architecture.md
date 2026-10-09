@@ -37,6 +37,7 @@
 | **Background is the only API client** | One place holds the token, validates, rate-limits and batches. Content scripts' `fetch` would also be subject to Amazon's CORS/CSP. |
 | **Change-only price history** (`price_points`) | A row only when the price changes → orders of magnitude less storage than one row per observation. Raw reports are kept separately (`price_observations`) for corroboration and reprocessing, with retention. |
 | **Compact wire format** (`history-codec.ts`) | Delta-encoded `[t, p, dt, p…]` integers; years of history in a few KB. |
+| **List price as a derived series** (`offer_type = 'list'`) | Clients report `listPriceCents` on offers; the API derives one `list` item per product (buy-box report first, else Amazon) and runs it through the same change-only + anti-poisoning pipeline. Clients can't send `list` directly. A missing list price is ignored (not a gap) so a selector miss can't erase the line. |
 | **Corroboration for suspicious jumps** | A single install can't crash a product's price to $1. Moves ≥2× or ≤½× need 2 distinct users within 24h. |
 | **Server time for points** | Client clocks are untrusted; points stay monotonic per series. |
 | **Valibot** over Zod | Tree-shakeable, smaller in the content script bundle; Standard Schema → works with `@hono/standard-validator`. |

@@ -1,4 +1,4 @@
-import { formatPrice, type MarketplaceId, type OfferType } from '@repo/shared';
+import { formatPrice, type MarketplaceId, type SeriesType } from '@repo/shared';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import uPlot from 'uplot';
@@ -16,7 +16,7 @@ export type XWindow = { min: number; max: number };
 interface Props {
   data: uPlot.AlignedData;
   marketplace: MarketplaceId;
-  visible: Record<OfferType, boolean>;
+  visible: Record<SeriesType, boolean>;
   /** Controlled x window (seconds) from the range selector. */
   window: XWindow | null;
   /** Drag-to-zoom selected a window. */
@@ -33,7 +33,7 @@ interface HoverState {
   left: number;
   plotWidth: number;
   plotHeight: number;
-  items: { key: OfferType; label: string; color: string; value: number; y: number }[];
+  items: { key: SeriesType; label: string; color: string; value: number; y: number }[];
 }
 
 const TOOLTIP_H = 38;
@@ -91,7 +91,8 @@ export function PriceChart({
           label: s.label,
           stroke: s.color,
           fill: s.fill,
-          width: 2,
+          dash: s.dash,
+          width: s.width ?? 2,
           spanGaps: false,
           show: cb.current.visible[s.key],
           paths: uPlot.paths.stepped?.({ align: 1 }),

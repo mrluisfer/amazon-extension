@@ -1,0 +1,1 @@
+ALTER TYPE "public"."offer_type" ADD VALUE 'list';

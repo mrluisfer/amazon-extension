@@ -1,4 +1,4 @@
-import { MARKETPLACE_IDS, OFFER_TYPES } from '@repo/shared';
+import { MARKETPLACE_IDS, SERIES_TYPES } from '@repo/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -17,7 +17,7 @@ import {
 } from 'drizzle-orm/pg-core';
 
 export const marketplaceEnum = pgEnum('marketplace', MARKETPLACE_IDS);
-export const offerTypeEnum = pgEnum('offer_type', OFFER_TYPES);
+export const offerTypeEnum = pgEnum('offer_type', SERIES_TYPES);
 export const observationStatusEnum = pgEnum('observation_status', [
   'accepted', // became (or confirmed) a price point
   'duplicate', // same price as the current point — only bumps last_observed_at

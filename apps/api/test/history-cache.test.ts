@@ -17,7 +17,7 @@ const history = (series: number[], generatedAt: string): HistoryResponse => ({
     imageUrl: null,
     lastObservedAt: null,
   },
-  series: { amazon: [], new: series, used: [] },
+  series: { amazon: [], new: series, used: [], list: [] },
   generatedAt,
 });
 

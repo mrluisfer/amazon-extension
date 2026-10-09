@@ -1,14 +1,14 @@
-import { formatPrice, type MarketplaceId, type OfferType } from '@repo/shared';
+import { formatPrice, type MarketplaceId, type SeriesType } from '@repo/shared';
 import { RANGES, type RangeOption, SERIES } from '@/lib/chart-series';
 
 interface LegendProps {
   marketplace: MarketplaceId;
-  visible: Record<OfferType, boolean>;
+  visible: Record<SeriesType, boolean>;
   /** Series with at least one point; the others render greyed out (like Keepa). */
-  available: Record<OfferType, boolean>;
+  available: Record<SeriesType, boolean>;
   /** Value shown next to each series: hovered value, else the current price. */
-  values: Record<OfferType, number | null>;
-  onToggle: (key: OfferType) => void;
+  values: Record<SeriesType, number | null>;
+  onToggle: (key: SeriesType) => void;
 }
 
 export function ChartLegend({ marketplace, visible, available, values, onToggle }: LegendProps) {

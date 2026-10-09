@@ -29,3 +29,11 @@ export function marketplaceFromHostname(hostname: string): Marketplace | undefin
  */
 export const OFFER_TYPES = ['amazon', 'new', 'used'] as const;
 export type OfferType = (typeof OFFER_TYPES)[number];
+
+/**
+ * History series = offer types + the list price ("Precio de lista"). The list
+ * price is derived server-side from observations' `listPriceCents`; clients can
+ * never report a `list` observation directly (ObservationSchema uses OFFER_TYPES).
+ */
+export const SERIES_TYPES = [...OFFER_TYPES, 'list'] as const;
+export type SeriesType = (typeof SERIES_TYPES)[number];

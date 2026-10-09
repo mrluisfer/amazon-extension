@@ -6,7 +6,7 @@ const H = 3600_000;
 
 describe('alignSeries', () => {
   it('aligns change-only series as carried-forward steps with a trailing "now" point', () => {
-    const [xs, amazon, fresh, used] = alignSeries(
+    const [xs, amazon, fresh, used, list] = alignSeries(
       {
         amazon: [
           [0, 1000],
@@ -14,6 +14,7 @@ describe('alignSeries', () => {
         ],
         new: [[H, 900]],
         used: [],
+        list: [[0, 1500]],
       },
       3 * H,
     );
@@ -21,10 +22,11 @@ describe('alignSeries', () => {
     expect(amazon).toEqual([1000, 1000, null, null]);
     expect(fresh).toEqual([null, 900, 900, 900]);
     expect(used).toEqual([null, null, null, null]);
+    expect(list).toEqual([1500, 1500, 1500, 1500]);
   });
 
   it('returns empty arrays when there is no data', () => {
-    expect(alignSeries({ amazon: [], new: [], used: [] })).toEqual([[], [], [], []]);
+    expect(alignSeries({ amazon: [], new: [], used: [], list: [] })).toEqual([[], [], [], [], []]);
   });
 });
 

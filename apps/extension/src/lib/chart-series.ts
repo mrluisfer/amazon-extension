@@ -1,11 +1,14 @@
-import type { OfferType } from '@repo/shared';
+import type { SeriesType } from '@repo/shared';
 
 export interface SeriesMeta {
-  key: OfferType;
+  key: SeriesType;
   label: string;
   color: string;
   /** Area fill under the line (Keepa fills the Amazon series). */
   fill?: string;
+  /** Dashed reference lines (list price). */
+  dash?: number[];
+  width?: number;
 }
 
 /**
@@ -17,6 +20,8 @@ export const SERIES: readonly SeriesMeta[] = [
   { key: 'amazon', label: 'Amazon', color: '#f39c12', fill: 'rgba(243, 156, 18, 0.14)' },
   { key: 'new', label: 'Caja de compra', color: '#e0249a' },
   { key: 'used', label: 'Usado', color: '#374151' },
+  // Reference, not a selling price: thin dashed grey, like Keepa's "Lista de precio".
+  { key: 'list', label: 'Precio de lista', color: '#9ca3af', dash: [6, 4], width: 1.5 },
 ];
 
 export interface RangeOption {

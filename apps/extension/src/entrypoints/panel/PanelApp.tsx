@@ -3,8 +3,8 @@ import {
   formatPrice,
   type MarketplaceId,
   MarketplaceIdSchema,
-  OFFER_TYPES,
-  type OfferType,
+  SERIES_TYPES,
+  type SeriesType,
 } from '@repo/shared';
 import { useMemo, useRef, useState } from 'react';
 import * as v from 'valibot';
@@ -30,7 +30,7 @@ function readParams(): { marketplace: MarketplaceId; asin: string } | null {
 }
 
 const allTrue = () =>
-  Object.fromEntries(OFFER_TYPES.map((t) => [t, true])) as Record<OfferType, boolean>;
+  Object.fromEntries(SERIES_TYPES.map((t) => [t, true])) as Record<SeriesType, boolean>;
 
 export function PanelApp() {
   const params = useMemo(readParams, []);
@@ -55,7 +55,7 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
     const xs = aligned[0];
     const available = Object.fromEntries(
       SERIES.map((s, i) => [s.key, (aligned[i + 1] ?? []).some((p) => p != null)]),
-    ) as Record<OfferType, boolean>;
+    ) as Record<SeriesType, boolean>;
     return { aligned, xs, available, totalDays: spanDays(xs) };
   }, [state]);
 
@@ -66,8 +66,8 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
 
   // Legend values: hovered point, else the latest known price per series.
   const values = useMemo(() => {
-    const out = Object.fromEntries(OFFER_TYPES.map((t) => [t, null])) as Record<
-      OfferType,
+    const out = Object.fromEntries(SERIES_TYPES.map((t) => [t, null])) as Record<
+      SeriesType,
       number | null
     >;
     if (!chart) return out;

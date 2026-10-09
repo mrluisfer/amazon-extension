@@ -1,4 +1,4 @@
-import { decodeSeries, OFFER_TYPES, type OfferType, type PricePoint } from '@repo/shared';
+import { decodeSeries, type PricePoint, SERIES_TYPES, type SeriesType } from '@repo/shared';
 
 export interface SeriesStats {
   current: number | null;
@@ -6,9 +6,9 @@ export interface SeriesStats {
   max: number | null;
 }
 
-export function decodeAll(series: Record<OfferType, number[]>): Record<OfferType, PricePoint[]> {
-  return Object.fromEntries(OFFER_TYPES.map((t) => [t, decodeSeries(series[t] ?? [])])) as Record<
-    OfferType,
+export function decodeAll(series: Record<SeriesType, number[]>): Record<SeriesType, PricePoint[]> {
+  return Object.fromEntries(SERIES_TYPES.map((t) => [t, decodeSeries(series[t] ?? [])])) as Record<
+    SeriesType,
     PricePoint[]
   >;
 }
@@ -20,16 +20,16 @@ export function decodeAll(series: Record<OfferType, number[]>): Record<OfferType
  * `null` renders as a gap (no data yet / out of stock).
  */
 export function alignSeries(
-  decoded: Record<OfferType, PricePoint[]>,
+  decoded: Record<SeriesType, PricePoint[]>,
   now: number = Date.now(),
 ): [xs: number[], ...ys: (number | null)[][]] {
   const timestamps = new Set<number>();
-  for (const t of OFFER_TYPES) for (const [ts] of decoded[t]) timestamps.add(ts);
-  if (timestamps.size === 0) return [[], ...OFFER_TYPES.map(() => [])];
+  for (const t of SERIES_TYPES) for (const [ts] of decoded[t]) timestamps.add(ts);
+  if (timestamps.size === 0) return [[], ...SERIES_TYPES.map(() => [])];
   timestamps.add(Math.max(now, ...timestamps));
 
   const xs = [...timestamps].sort((a, b) => a - b);
-  const ys = OFFER_TYPES.map((t) => {
+  const ys = SERIES_TYPES.map((t) => {
     const points = decoded[t];
     let i = 0;
     let last: number | null = null;

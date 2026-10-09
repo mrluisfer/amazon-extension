@@ -1,4 +1,4 @@
-import type { MarketplaceId, OfferType } from './marketplaces';
+import type { MarketplaceId, SeriesType } from './marketplaces';
 
 /** Response of GET /v1/products/:marketplace/:asin/history */
 export interface HistoryResponse {
@@ -11,7 +11,7 @@ export interface HistoryResponse {
     lastObservedAt: string | null;
   } | null;
   /** Encoded with `encodeSeries` — decode with `decodeSeries`. */
-  series: Record<OfferType, number[]>;
+  series: Record<SeriesType, number[]>;
   generatedAt: string;
 }
 

@@ -3,9 +3,9 @@ import {
   encodeSeries,
   type HistoryResponse,
   type MarketplaceId,
-  OFFER_TYPES,
-  type OfferType,
   type PricePoint,
+  SERIES_TYPES,
+  type SeriesType,
 } from '@repo/shared';
 import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
 
@@ -16,8 +16,8 @@ export async function getHistory(
   days: number,
   now: Date = new Date(),
 ): Promise<HistoryResponse> {
-  const empty = Object.fromEntries(OFFER_TYPES.map((t) => [t, []])) as unknown as Record<
-    OfferType,
+  const empty = Object.fromEntries(SERIES_TYPES.map((t) => [t, []])) as unknown as Record<
+    SeriesType,
     number[]
   >;
 
@@ -58,7 +58,7 @@ export async function getHistory(
       .orderBy(pricePoints.offerType, desc(pricePoints.ts)),
   ]);
 
-  const grouped = new Map<OfferType, PricePoint[]>(OFFER_TYPES.map((t) => [t, []]));
+  const grouped = new Map<SeriesType, PricePoint[]>(SERIES_TYPES.map((t) => [t, []]));
   for (const row of carriedIn) grouped.get(row.offerType)?.push([since.getTime(), row.priceCents]);
   for (const row of inWindow) grouped.get(row.offerType)?.push([row.ts.getTime(), row.priceCents]);
 

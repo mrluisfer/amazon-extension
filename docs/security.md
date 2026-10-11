@@ -28,7 +28,7 @@ The background uses `tabs.onUpdated` only to clear the per-tab badge on navigati
 
 **Single-purpose note (CWS):** hiding sponsored results is framed as part of the same purpose — a cleaner Amazon shopping/price-comparison experience. It only adds attributes/CSS on Amazon search and product pages, never blocks network requests, and can be turned off in the popup/options.
 
-## Data collected (keep in sync with OptionsApp.tsx and the privacy policy)
+## Data collected (keep in sync with OptionsApp.tsx and the privacy policy, `apps/web/app/routes/privacy.tsx`)
 
 - **With consent only:** ASIN, title, image URL, displayed prices (new/used/Amazon/list), availability, observation time — from Amazon product pages.
 - **Always (core function):** the ASIN of the product being viewed is sent to fetch its history.
@@ -59,7 +59,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ap
 
 ## Known gaps / TODO
 
-- [ ] Retention job for `price_observations`.
+- [ ] Retention job for `price_observations` — **the public privacy policy already promises 90 days**; implement before launch.
 - [ ] Shared-store rate limiter before running >1 API instance.
 - [ ] Evaluate `use_dynamic_url` for `web_accessible_resources` (anti-fingerprinting) once tested with the iframe flow.
 - [ ] Reputation score per install (weight corroboration by account age/accuracy).

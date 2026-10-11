@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest an idea or improvement
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and why is it hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How could the extension help? Mockups welcome.
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Data and permissions
+      description: Would this need new data, permissions or sites? (We keep both to a minimum — see docs/security.md.)
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to work on this

@@ -1,0 +1,18 @@
+#!/bin/sh
+# Enforces Conventional Commits: type(scope)!: summary — see CONTRIBUTING.md.
+msg_file="$1"
+first_line=$(head -n1 "$msg_file")
+
+# Let git's own generated messages through.
+case "$first_line" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *|amend!\ *) exit 0 ;;
+esac
+
+pattern='^(feat|fix|docs|refactor|perf|test|build|ci|chore|style|revert)(\([a-z0-9-]+\))?!?: .{1,100}$'
+if ! printf '%s' "$first_line" | grep -Eq "$pattern"; then
+  echo "commit-msg: use Conventional Commits, e.g. 'fix(parser): read the deal price'." >&2
+  echo "  types:  feat fix docs refactor perf test build ci chore style revert" >&2
+  echo "  scopes: extension api web parser shared db brand deps dev (optional)" >&2
+  echo "  got:    $first_line" >&2
+  exit 1
+fi

@@ -5,6 +5,9 @@ node_modules/
 # Build output & caches
 dist/
 .output/
+build/
+.react-router/
+.vercel/
 .wxt/
 .turbo/
 coverage/

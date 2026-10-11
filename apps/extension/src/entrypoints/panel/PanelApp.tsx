@@ -1,3 +1,4 @@
+import { LogoMark } from '@repo/brand';
 import {
   AsinSchema,
   formatPrice,
@@ -110,7 +111,8 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
   return (
     <div className="flex h-screen flex-col gap-1.5 rounded-lg border border-line p-3 font-sans text-xs">
       <header className="flex items-end justify-between border-b border-line">
-        <div role="tablist" aria-label="Panel" className="-mb-px flex">
+        <div role="tablist" aria-label="Historial de Precios MX" className="-mb-px flex items-end">
+          <LogoMark size={18} className="mr-1 mb-1.5 shrink-0" />
           {(
             [
               ['history', 'Historial de precios'],
@@ -163,18 +165,15 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
         {state.status === 'error' && (
           <div className="flex h-[330px] flex-col items-center justify-center gap-2 text-sm text-fg-muted">
             <p>No pudimos cargar el historial.</p>
-            <button
-              type="button"
-              onClick={reload}
-              className="rounded border border-line-strong px-3 py-1 text-xs hover:bg-surface-2"
-            >
+            <button type="button" onClick={reload} className="btn btn-secondary px-3 py-1 text-xs">
               Reintentar
             </button>
           </div>
         )}
 
         {state.status === 'success' && !hasData && (
-          <div className="flex h-[330px] items-center justify-center px-6 text-center text-sm text-fg-muted">
+          <div className="flex h-[330px] flex-col items-center justify-center gap-3 px-6 text-center text-sm text-fg-muted">
+            <LogoMark size={40} />
             Aún no hay historial para este producto. Se construye con los precios que la comunidad
             comparte.
           </div>

@@ -13,6 +13,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Squash merges use the PR title as the commit message: keep it Conventional.
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check Conventional Commits title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|refactor|perf|test|build|ci|chore|style|revert)(\([a-z0-9-]+\))?!?: .+'
+          if ! printf '%s' "$TITLE" | grep -Eq "$pattern"; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'fix(parser): read deal price'. Got: $TITLE"
+            exit 1
+          fi
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15

@@ -7,7 +7,7 @@ export function HideSponsoredToggle({ description = false }: { description?: boo
   return (
     <label className="flex cursor-pointer items-start justify-between gap-3">
       <span className="flex flex-col">
-        <span className="font-medium">Ocultar contenido patrocinado</span>
+        <span className="font-bold">Ocultar contenido patrocinado</span>
         {description && (
           <span className="text-xs text-fg-muted">
             Oculta los anuncios marcados como «Patrocinado» en las búsquedas y en las páginas de
@@ -17,10 +17,12 @@ export function HideSponsoredToggle({ description = false }: { description?: boo
       </span>
       <input
         type="checkbox"
+        role="switch"
+        aria-checked={enabled ?? true}
         checked={enabled ?? true}
         disabled={enabled === null}
         onChange={(e) => void setEnabled(e.target.checked)}
-        className="mt-0.5 h-4 w-4 accent-[var(--color-brand)]"
+        className="switch mt-0.5"
       />
     </label>
   );

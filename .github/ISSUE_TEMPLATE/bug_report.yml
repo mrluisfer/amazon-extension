@@ -1,0 +1,48 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Prices missing or wrong on a product page? Use the **Amazon layout broke** template instead.
+        **Security issue?** Don't file it here — see [SECURITY.md](https://github.com/mrluisfer/amazon-extension/blob/main/SECURITY.md).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Extension panel, Popup / settings, Hide sponsored, API, Website, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open https://www.amazon.com.mx/dp/B0XXXXXXXX
+        2. Scroll to the price panel
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      description: chrome://extensions → Historial de Precios MX
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Chrome 141 on Windows 11
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, console errors, anything else
+      description: Please remove personal data (name, address, order info) from screenshots.

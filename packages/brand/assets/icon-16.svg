@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Historial de Precios MX</title>
+  <!-- Small-size logo mark (16–20px): fewer steps, heavier strokes. Keep in sync with Logo.tsx. -->
+  <rect width="128" height="128" rx="24" fill="#232F3E"/>
+  <path d="M20 40H52V76H76" fill="none" stroke="#FF9900" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="104" cy="76" r="15" fill="#FFD814"/>
+</svg>

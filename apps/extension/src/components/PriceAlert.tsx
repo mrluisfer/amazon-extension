@@ -1,3 +1,4 @@
+import { BellIcon } from '@repo/brand';
 import { formatPrice, type MarketplaceId } from '@repo/shared';
 import { useState } from 'react';
 import { sendMessage } from '@/lib/messaging';
@@ -42,21 +43,23 @@ export function PriceAlert({ marketplace, asin }: Props) {
     content = <span className="text-fg-muted">Avisos de precio no disponibles por ahora.</span>;
   } else if (!status.data.hasAccount) {
     content = (
-      <span className="text-fg-muted">
-        🔔 Inicia sesión para recibir un aviso cuando este producto baje de precio.
+      <span className="flex items-center gap-1.5 text-fg-muted">
+        <BellIcon size={14} className="shrink-0" />
+        Inicia sesión para recibir un aviso cuando este producto baje de precio.
       </span>
     );
   } else if (status.data.item && !editing) {
     const item = status.data.item;
     content = (
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-fg-2">
-          🔔 Te avisaremos si baja de{' '}
+        <span className="flex items-center gap-1.5 text-fg-2">
+          <BellIcon size={14} className="shrink-0 text-brand" />
+          Te avisaremos si baja de{' '}
           <strong>
             {item.targetPriceCents != null ? formatPrice(item.targetPriceCents, marketplace) : '—'}
           </strong>
         </span>
-        <button type="button" onClick={() => setEditing(true)} className="text-fg-muted underline">
+        <button type="button" onClick={() => setEditing(true)} className="link">
           Cambiar
         </button>
         <button
@@ -123,7 +126,8 @@ function PriceForm({
         setSaving(false);
       }}
     >
-      <label htmlFor="target" className="text-fg-muted">
+      <label htmlFor="target" className="flex items-center gap-1.5 text-fg-2">
+        <BellIcon size={14} className="shrink-0 text-fg-muted" />
         Avísame si baja de
       </label>
       <input
@@ -133,18 +137,18 @@ function PriceForm({
         value={value}
         onChange={(e) => setValue(e.target.value.replace(/[^\d.,$\s]/g, ''))}
         aria-invalid={invalid}
-        className="w-24 rounded border border-line-strong px-2 py-1 aria-invalid:border-danger"
+        className="input w-24 px-2 py-1"
       />
       <button
         type="submit"
         disabled={cents === null || saving}
         title={cents === null ? 'Escribe el precio al que quieres que te avisemos' : undefined}
-        className="rounded bg-brand px-3 py-1 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="btn btn-primary px-3.5 py-1"
       >
         {submitLabel}
       </button>
       {onCancel && (
-        <button type="button" onClick={onCancel} className="text-fg-muted underline">
+        <button type="button" onClick={onCancel} className="link">
           Cancelar
         </button>
       )}

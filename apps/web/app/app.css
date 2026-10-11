@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@repo/brand/theme.css";
+
+/* The website follows the OS theme (the brand tokens are light-dark() colors). */
+:root {
+  color-scheme: light dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  background: var(--color-surface);
+  color: var(--color-fg);
+}

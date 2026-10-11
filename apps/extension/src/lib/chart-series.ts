@@ -34,12 +34,12 @@ const SERIES_DEFS: readonly SeriesDef[] = [
     fill: { light: 'rgba(243, 156, 18, 0.14)', dark: 'rgba(245, 165, 36, 0.16)' },
   },
   { key: 'new', label: 'Caja de compra', color: { light: '#e0249a', dark: '#f0479f' } },
-  { key: 'used', label: 'Usado', color: { light: '#374151', dark: '#d4d4d8' } },
+  { key: 'used', label: 'Usado', color: { light: '#333838', dark: '#d5d9d9' } },
   // Reference, not a selling price: thin dashed grey, like Keepa's "Lista de precio".
   {
     key: 'list',
     label: 'Precio de lista',
-    color: { light: '#9ca3af', dark: '#71717a' },
+    color: { light: '#8a8f8f', dark: '#6f7e8c' },
     dash: [6, 4],
     width: 1.5,
   },
@@ -59,8 +59,8 @@ export const SERIES: readonly SeriesMeta[] = RESOLVED.light;
 
 /** Canvas colors (uPlot draws axes/grid itself; CSS can't reach them). */
 export const CHART_PALETTE: Themed<{ axis: string; grid: string; tick: string; point: string }> = {
-  light: { axis: '#6b7280', grid: '#eef0f3', tick: '#e5e7eb', point: '#ffffff' },
-  dark: { axis: '#a1a1aa', grid: '#2a2a2f', tick: '#3f3f46', point: '#18181b' },
+  light: { axis: '#565959', grid: '#eef0f0', tick: '#d5d9d9', point: '#ffffff' },
+  dark: { axis: '#a7b1bc', grid: '#1f2a37', tick: '#37475a', point: '#131921' },
 };
 
 export interface RangeOption {

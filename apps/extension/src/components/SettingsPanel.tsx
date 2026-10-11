@@ -11,8 +11,8 @@ const OPTIONS: { value: ThemePref; label: string; hint: string }[] = [
 
 /** Mini preview of the chart in each theme (static colors on purpose). */
 function Preview({ value }: { value: ThemePref }) {
-  const light = { bg: '#ffffff', line: '#e0249a', grid: '#eef0f3' };
-  const dark = { bg: '#18181b', line: '#f0479f', grid: '#2a2a2f' };
+  const light = { bg: '#ffffff', line: '#e0249a', grid: '#eef0f0' };
+  const dark = { bg: '#131921', line: '#f0479f', grid: '#1f2a37' };
   const chart = (c: typeof light, clip?: string) => (
     <svg
       viewBox="0 0 64 36"
@@ -43,12 +43,12 @@ export function SettingsPanel({ pref, resolved, onChange }: Props) {
   return (
     <div className="flex flex-col gap-4 py-1">
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-        <legend className="mb-1 text-sm font-semibold text-fg">Tema de la gráfica</legend>
+        <legend className="mb-1 text-sm font-semibold text-fg">Tema</legend>
         <div className="flex flex-wrap gap-2">
           {OPTIONS.map((o) => (
             <label
               key={o.value}
-              className="flex cursor-pointer items-center gap-3 rounded-md border border-line px-3 py-2 hover:bg-surface-2 has-checked:border-brand has-checked:bg-surface-2"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-line px-3 py-2 hover:bg-surface-2 has-checked:border-brand has-checked:bg-surface-2"
             >
               <input
                 type="radio"
@@ -71,18 +71,18 @@ export function SettingsPanel({ pref, resolved, onChange }: Props) {
           ))}
         </div>
         <p className="text-[11px] text-fg-muted">
-          Amazon no tiene modo oscuro; esto solo cambia el panel de la extensión.
+          Amazon no tiene modo oscuro; esto solo cambia el panel y las ventanas de la extensión.
         </p>
       </fieldset>
 
-      <div className="max-w-md rounded-md border border-line p-3">
+      <div className="card max-w-md p-3">
         <HideSponsoredToggle description />
       </div>
 
       <button
         type="button"
         onClick={() => void browser.runtime.openOptionsPage()}
-        className="self-start text-fg-muted underline hover:text-fg"
+        className="link self-start"
       >
         Más ajustes (privacidad y datos)
       </button>

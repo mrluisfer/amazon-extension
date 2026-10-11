@@ -2,7 +2,8 @@
 
 | Path | What goes there |
 |---|---|
-| `../CLAUDE.md` | Project memory loaded every session: layout, commands, hard rules. Keep it short. |
+| `../AGENTS.md` | Tool-agnostic agent instructions (layout, commands, hard rules) — the single source of truth, also read by Codex/Cursor/Copilot/Gemini. |
+| `../CLAUDE.md` | Imports `AGENTS.md` (`@AGENTS.md`) and adds Claude Code specifics (skills, agents, Neon). Keep it short. |
 | `settings.json` | Shared permissions + hooks (committed). Personal overrides → `settings.local.json` (git-ignored). |
 | `hooks/` | Scripts run by hooks. `protect-files.mjs` blocks edits to secrets/lockfile/migrations; `format.mjs` runs Biome after each edit. |
 | `skills/<name>/SKILL.md` | Repeatable workflows Claude loads on demand (invoke with `/<name>` or automatically by description). |

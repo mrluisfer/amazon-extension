@@ -1,0 +1,11 @@
+# Default reviewers for everything.
+* @mrluisfer
+
+# Security-sensitive areas: changes here always need a maintainer review.
+/apps/extension/wxt.config.ts            @mrluisfer
+/apps/extension/src/lib/messaging.ts     @mrluisfer
+/apps/api/src/middleware/                @mrluisfer
+/packages/db/migrations/                 @mrluisfer
+/apps/web/app/routes/privacy.tsx         @mrluisfer
+/docs/security.md                        @mrluisfer
+/.github/                                @mrluisfer

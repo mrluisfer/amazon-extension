@@ -10,10 +10,12 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "typecheck": "wxt prepare && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "icons": "node scripts/build-icons.mjs"
   },
   "dependencies": {
     "@repo/amazon-parser": "workspace:*",
+    "@repo/brand": "workspace:*",
     "@repo/shared": "workspace:*",
     "hono": "^4.13.13",
     "react": "^19.3.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@repo/api": "workspace:*",
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

@@ -1,0 +1,37 @@
+name: Amazon layout broke
+description: Prices, title or availability are missing or wrong on a product page
+labels: [parser, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Amazon changes its HTML often — these reports are the most useful ones. One product per issue, please.
+  - type: input
+    id: url
+    attributes:
+      label: Product URL or ASIN
+      placeholder: https://www.amazon.com.mx/dp/B0XXXXXXXX
+    validations:
+      required: true
+  - type: checkboxes
+    id: wrong
+    attributes:
+      label: What's wrong?
+      options:
+        - label: The panel doesn't appear
+        - label: Price missing
+        - label: Price wrong (shows a different value than the page)
+        - label: List price / used price wrong or missing
+        - label: Title, image or availability wrong
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Which price did you see on Amazon, and what did the panel show? Was it a deal, a variant (size/color) or a third-party seller?
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: When did you see it?
+      placeholder: 2026-10-11, around 18:00 (Mexico City)

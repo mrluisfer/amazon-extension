@@ -1,4 +1,5 @@
 import { canonicalProductUrl } from '@repo/amazon-parser';
+import { BellIcon, CloseIcon, InfoIcon, Logo, SlidersIcon } from '@repo/brand';
 import { formatPrice, MARKETPLACES } from '@repo/shared';
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
@@ -28,82 +29,102 @@ export function PopupApp() {
   };
 
   return (
-    <main className="flex flex-col gap-3 p-4 font-sans text-sm">
-      <header className="flex items-center justify-between">
-        <h1 className="font-semibold">Historial de Precios MX</h1>
+    <div className="font-sans text-sm text-fg">
+      <header className="flex items-center justify-between bg-ink-deep px-4 py-2.5 text-white">
+        <Logo size={24} />
         <button
           type="button"
           onClick={() => void browser.runtime.openOptionsPage()}
-          className="text-xs text-gray-600 underline"
+          aria-label="Ajustes"
+          title="Ajustes"
+          className="grid h-8 w-8 place-items-center rounded-full text-white/80 hover:bg-white/10 hover:text-white focus-visible:shadow-focus focus-visible:outline-none"
         >
-          Ajustes
+          <SlidersIcon />
         </button>
       </header>
 
-      {consent === 'unknown' && (
-        <p className="rounded bg-amber-50 p-2 text-xs text-amber-900">
-          Ayuda a construir el historial compartiendo precios de forma anónima.{' '}
-          <button
-            type="button"
-            onClick={() => void browser.runtime.openOptionsPage()}
-            className="underline"
-          >
-            Más información
-          </button>
-        </p>
-      )}
-
-      <section className="rounded border border-gray-200 p-2 text-xs">
-        <HideSponsoredToggle />
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
-          Siguiendo
-        </h2>
-        {tracked.status === 'loading' && <p className="text-gray-500">Cargando…</p>}
-        {tracked.status === 'error' && <p className="text-red-700">No se pudo cargar la lista.</p>}
-        {tracked.status === 'success' && !tracked.data.hasAccount && (
-          <p className="text-gray-500">Inicia sesión para crear avisos de precio y verlos aquí.</p>
+      <main className="flex flex-col gap-3 p-4">
+        {consent === 'unknown' && (
+          <p className="flex gap-2 rounded-lg border border-notice-line bg-notice p-2.5 text-xs">
+            <InfoIcon size={14} className="mt-px shrink-0 text-fg-muted" />
+            <span>
+              Ayuda a construir el historial compartiendo precios de forma anónima.{' '}
+              <button
+                type="button"
+                onClick={() => void browser.runtime.openOptionsPage()}
+                className="link"
+              >
+                Más información
+              </button>
+            </span>
+          </p>
         )}
-        {tracked.status === 'success' &&
-          tracked.data.hasAccount &&
-          tracked.data.items.length === 0 && (
-            <p className="text-gray-500">Abre un producto en Amazon y crea un aviso de precio.</p>
+
+        <section className="card p-3 text-xs">
+          <HideSponsoredToggle />
+        </section>
+
+        <section>
+          <h2 className="mb-2 flex items-center gap-1.5 text-xs font-bold text-fg-2">
+            <BellIcon size={14} className="text-fg-muted" />
+            Siguiendo
+          </h2>
+          {tracked.status === 'loading' && <p className="text-fg-muted">Cargando…</p>}
+          {tracked.status === 'error' && <p className="text-danger">No se pudo cargar la lista.</p>}
+          {tracked.status === 'success' && !tracked.data.hasAccount && (
+            <p className="text-fg-muted">
+              Inicia sesión para crear avisos de precio y verlos aquí.
+            </p>
           )}
-        {tracked.status === 'success' && tracked.data.items.length > 0 && (
-          <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">
-            {tracked.data.items.map((item) => (
-              <li key={item.id} className="flex items-center gap-2">
-                {item.imageUrl && (
-                  <img src={item.imageUrl} alt="" className="h-10 w-10 object-contain" />
-                )}
-                <a
-                  href={canonicalProductUrl(MARKETPLACES[item.marketplace], item.asin)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="line-clamp-2 flex-1 hover:underline"
-                >
-                  {item.title ?? item.asin}
-                </a>
-                {item.targetPriceCents != null && (
-                  <span className="text-xs text-gray-600">
-                    {formatPrice(item.targetPriceCents, item.marketplace)}
+          {tracked.status === 'success' &&
+            tracked.data.hasAccount &&
+            tracked.data.items.length === 0 && (
+              <p className="text-fg-muted">Abre un producto en Amazon y crea un aviso de precio.</p>
+            )}
+          {tracked.status === 'success' && tracked.data.items.length > 0 && (
+            <ul className="card flex max-h-80 flex-col divide-y divide-line overflow-y-auto">
+              {tracked.data.items.map((item) => (
+                <li key={item.id} className="flex items-center gap-2.5 p-2">
+                  {item.imageUrl && (
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      className="h-10 w-10 shrink-0 rounded bg-white object-contain"
+                    />
+                  )}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <a
+                      href={canonicalProductUrl(MARKETPLACES[item.marketplace], item.asin)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link line-clamp-2"
+                    >
+                      {item.title ?? item.asin}
+                    </a>
+                    {item.targetPriceCents != null && (
+                      <span className="text-xs text-fg-muted">
+                        Aviso si baja de{' '}
+                        <strong className="text-fg">
+                          {formatPrice(item.targetPriceCents, item.marketplace)}
+                        </strong>
+                      </span>
+                    )}
                   </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void remove(item.id)}
-                  aria-label="Dejar de seguir"
-                  className="text-gray-400 hover:text-red-600"
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </main>
+                  <button
+                    type="button"
+                    onClick={() => void remove(item.id)}
+                    aria-label="Dejar de seguir"
+                    title="Dejar de seguir"
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-fg-subtle hover:bg-surface-3 hover:text-danger"
+                  >
+                    <CloseIcon size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import {
-  formatAxisDate,
+  formatAxisDates,
   formatAxisPrice,
   formatCursorDate,
   layoutTooltips,
@@ -119,7 +119,7 @@ export function PriceChart({
           stroke: palette.axis,
           grid: { stroke: palette.grid },
           ticks: { stroke: palette.tick },
-          values: (_u, splits) => splits.map((s) => formatAxisDate(s, marketplace)),
+          values: (_u, splits) => formatAxisDates(splits, marketplace),
         },
         {
           stroke: palette.axis,

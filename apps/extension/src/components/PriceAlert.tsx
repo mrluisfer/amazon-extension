@@ -12,7 +12,7 @@ interface Props {
 
 /**
  * "Avísame si baja de…" for the current product. States:
- * - no account → invitation to sign in (alerts are tied to a person)
+ * - no account → "coming soon" (alerts need sign-in, which doesn't exist yet)
  * - no alert   → form; submitting requires a valid target price
  * - has alert  → shows it, with "Cambiar" / "Dejar de seguir" (never a duplicate)
  */
@@ -45,7 +45,7 @@ export function PriceAlert({ marketplace, asin }: Props) {
     content = (
       <span className="flex items-center gap-1.5 text-fg-muted">
         <BellIcon size={14} className="shrink-0" />
-        Inicia sesión para recibir un aviso cuando este producto baje de precio.
+        Próximamente: avisos cuando este producto baje de precio.
       </span>
     );
   } else if (status.data.item && !editing) {

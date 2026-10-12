@@ -37,3 +37,13 @@ export const observationQueueItem = storage.defineItem<Observation[]>('local:obs
   fallback: [],
   version: 1,
 });
+
+/**
+ * Backoff after failed anonymous registrations. Session storage: survives the
+ * MV3 service worker restarting (which happens every ~30s idle) but resets with
+ * the browser, so a long outage never blocks a fresh session for long.
+ */
+export const registrationBackoffItem = storage.defineItem<{
+  failures: number;
+  retryAt: number;
+} | null>('session:registrationBackoff', { fallback: null });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatAxisDate,
+  formatAxisDates,
   formatAxisPrice,
   formatRelative,
   layoutTooltips,
@@ -37,6 +38,29 @@ describe('es-MX formatting', () => {
   it('formats axis prices without cents and dates as "16 jul"', () => {
     expect(formatAxisPrice(125_000, 'mx')).toBe('$1,250');
     expect(formatAxisDate(Date.UTC(2026, 6, 16, 18) / 1000, 'mx')).toBe('16 jul');
+  });
+
+  it('labels sub-day ticks with the time and the date only when the day changes', () => {
+    // Local-time ticks every 8h, like uPlot picks for a few days of data.
+    const at = (d: number, h: number) => new Date(2026, 9, d, h).getTime() / 1000;
+    const splits = [at(9, 8), at(9, 16), at(10, 0), at(10, 8), at(10, 16), at(11, 0)];
+    expect(formatAxisDates(splits, 'mx')).toEqual([
+      '9 oct',
+      '16:00',
+      '10 oct',
+      '08:00',
+      '16:00',
+      '11 oct',
+    ]);
+  });
+
+  it('labels day-or-larger ticks with dates only', () => {
+    const day = (d: number) => new Date(2026, 9, d).getTime() / 1000;
+    expect(formatAxisDates([day(9), day(10), day(11)], 'mx')).toEqual([
+      '9 oct',
+      '10 oct',
+      '11 oct',
+    ]);
   });
 
   it('formats relative times', () => {

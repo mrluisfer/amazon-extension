@@ -10,19 +10,23 @@ Create a **Web Service** from the GitHub repo with these settings:
 | Setting | Value |
 |---|---|
 | Root directory | _(empty — repo root, the API needs the workspace packages)_ |
+| Build filters → included paths | `apps/api/**`, `packages/shared/**`, `packages/db/**`, `package.json`, `pnpm-lock.yaml` (so website/extension changes don't redeploy the API) |
 | Region | **Ohio (US East)** — same region as the Neon database (`aws-us-east-2`) |
 | Runtime | Node |
 | Build command | `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @repo/api build` |
-| Start command | `pnpm --filter @repo/api start` |
+| Start command | `NODE_ENV=production pnpm --filter @repo/api start` |
 | Health check path | `/health` |
 | Auto-deploy | On commit to `main` (optionally "after CI checks pass") |
 
 Environment variables (Render → Environment). Render sets `PORT` itself.
 
+> [!IMPORTANT]
+> Don't add `NODE_ENV` here: with `NODE_ENV=production` at build time, `pnpm install` skips
+> devDependencies and the build fails (`tsdown` is one). It's set in the start command instead.
+
 | Variable | Value |
 |---|---|
 | `NODE_VERSION` | `24` |
-| `NODE_ENV` | `production` |
 | `DATABASE_URL` | Neon **pooled** connection string (host contains `-pooler`) for the least-privileged `app_runtime` role — see [`security.md`](security.md#database-roles-neon). Never the owner role. |
 | `ALLOWED_ORIGINS` | `chrome-extension://<extension-id>` (comma-separated; add `moz-extension://…` / Edge IDs as needed). Required in production. |
 | `TRUST_PROXY` | `true` — Render's proxy sets `X-Forwarded-For`, which the per-IP rate limits rely on. |

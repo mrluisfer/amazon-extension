@@ -41,10 +41,10 @@ describe('MemoryRateLimiter', () => {
 });
 
 describe('loadEnv', () => {
-  it('requires ALLOWED_ORIGINS in production', () => {
-    expect(() => loadEnv({ NODE_ENV: 'production', DATABASE_URL: 'postgresql://x' })).toThrow(
-      /ALLOWED_ORIGINS/,
-    );
+  it('allows an empty ALLOWED_ORIGINS in production (CORS then admits no web origin)', () => {
+    expect(loadEnv({ NODE_ENV: 'production', DATABASE_URL: 'postgresql://x' })).toMatchObject({
+      ALLOWED_ORIGINS: [],
+    });
   });
 
   it('parses defaults and lists', () => {

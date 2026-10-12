@@ -35,7 +35,7 @@
 | **Panel placement**: same slot as Keepa — after `#hover-zoom-end` (end of the above-the-fold block on every layout), directly above `#keepaContainer` when Keepa is installed (`lib/panel-anchor.ts`) | Users already know that position; both extensions coexist stacked, ours on top. Keepa injects ~50–100 ms after DCL, so a childList-only observer on `#dp-container` moves *our* node back above Keepa (never Keepa's). Box matches Keepa's: left-aligned, ≤960px, 10px top margin. |
 | **Iframe panel** instead of injecting React into Amazon's DOM | Full CSS/JS isolation, out-of-process rendering (doesn't slow Amazon), page can't read our UI, heavy code (React, uPlot) never loads in the content script. Same approach as Keepa. |
 | **Background is the only API client** | One place holds the token, validates, rate-limits and batches. Content scripts' `fetch` would also be subject to Amazon's CORS/CSP. |
-| **Change-only price history** (`price_points`) | A row only when the price changes → orders of magnitude less storage than one row per observation. Raw reports are kept separately (`price_observations`) for corroboration and reprocessing, with retention. |
+| **Change-only price history** (`price_points`) | A row only when the price changes → orders of magnitude less storage than one row per observation. Raw reports are kept separately (`price_observations`) for corroboration, deal detection and reprocessing (kept indefinitely; no PII). |
 | **Compact wire format** (`history-codec.ts`) | Delta-encoded `[t, p, dt, p…]` integers; years of history in a few KB. |
 | **List price as a derived series** (`offer_type = 'list'`) | Clients report `listPriceCents` on offers; the API derives one `list` item per product (buy-box report first, else Amazon) and runs it through the same change-only + anti-poisoning pipeline. Clients can't send `list` directly. A missing list price is ignored (not a gap) so a selector miss can't erase the line. |
 | **Theming** (Sistema / Claro / Oscuro, panel only) | Semantic colors are `light-dark()` CSS tokens resolved by `color-scheme` on `<html data-theme>`: "Sistema" is pure CSS (no listeners). The preference lives in `chrome.storage` (synced across tabs) and is mirrored to extension-origin `localStorage` for a synchronous first paint (no flash). Only the uPlot canvas needs JS colors (`CHART_PALETTE`/`seriesFor`), rebuilt once per actual theme change, keeping range/zoom. |
@@ -51,7 +51,7 @@
 1. **Rate limiting** — `MemoryRateLimiter` is per-process. With >1 API instance, implement `RateLimiter` over Redis/Upstash.
 2. **Ingest volume** — move `ingestBatch` behind a queue (accept → enqueue → worker) and batch the per-observation queries.
 3. **History reads** — data is identical for all users: add a CDN/edge cache keyed by `marketplace/asin/days`, or precompute encoded series on write.
-4. **Storage** — partition `price_observations` by month and drop old partitions (retention). If `price_points` grows past ~10⁹ rows, consider TimescaleDB/ClickHouse.
+4. **Storage** — partition `price_observations` by month (cheap scans, and old partitions can move to cold storage). If `price_points` grows past ~10⁹ rows, consider TimescaleDB/ClickHouse.
 5. **Alerts** — worker that, on each accepted point, checks `tracked_products` with `target_price_cents` (indexed) and sends email/Telegram/Web Push.
 
 ## Features beyond Keepa

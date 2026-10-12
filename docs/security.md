@@ -34,7 +34,7 @@ The background uses `tabs.onUpdated` only to clear the per-tab badge on navigati
 - **Always (core function):** the ASIN of the product being viewed is sent to fetch its history.
 - Linked to a random install ID, not to identity. No browsing history, no Amazon account data, no cookies.
 - Erasure: `DELETE /v1/me` (button in options) removes the user, tokens and watchlist; past observations are kept with `user_id = NULL`.
-- **Retention (to implement):** delete `price_observations` older than 90 days (keep `price_points`).
+- **Retention:** `price_observations` are kept indefinitely (full history, deal detection, re-processing). They hold no PII; on erasure their `user_id` is set to NULL. The privacy policy states this — change both together.
 
 ## Database roles (Neon)
 
@@ -59,7 +59,6 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ap
 
 ## Known gaps / TODO
 
-- [ ] Retention job for `price_observations` — **the public privacy policy already promises 90 days**; implement before launch.
 - [ ] Shared-store rate limiter before running >1 API instance.
 - [ ] Evaluate `use_dynamic_url` for `web_accessible_resources` (anti-fingerprinting) once tested with the iframe flow.
 - [ ] Reputation score per install (weight corroboration by account age/accuracy).

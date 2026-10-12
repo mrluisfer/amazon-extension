@@ -52,3 +52,43 @@ export function statsFor(points: readonly PricePoint[]): SeriesStats {
     max: prices.length ? Math.max(...prices) : null,
   };
 }
+
+/**
+ * Index of the price in effect at time `x` (seconds): the last timestamp ≤ x.
+ * Step semantics — a price holds until the next change — so hovering anywhere on
+ * the chart reads the value shown there, not the nearest data point.
+ */
+export function stepIndex(xs: ArrayLike<number>, x: number): number | null {
+  let lo = 0;
+  let hi = xs.length - 1;
+  if (hi < 0 || x < (xs[0] as number)) return null;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if ((xs[mid] as number) <= x) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
+
+/**
+ * Min/max over the given series between indices i0..i1 (inclusive), also
+ * counting the value in effect just before i0 (it is drawn at the window's left
+ * edge). Null when those series have no values there.
+ */
+export function valueExtent(
+  ys: readonly ArrayLike<number | null | undefined>[],
+  i0: number,
+  i1: number,
+): [min: number, max: number] | null {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const values of ys) {
+    for (let i = Math.max(0, i0 - 1); i <= i1 && i < values.length; i++) {
+      const v = values[i];
+      if (v == null) continue;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+  }
+  return min === Number.POSITIVE_INFINITY ? null : [min, max];
+}

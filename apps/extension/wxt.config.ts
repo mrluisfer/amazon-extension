@@ -51,6 +51,9 @@ export default defineConfig({
       }),
     };
   },
+  zip: {
+    artifactTemplate: 'historial-precios-mx-{{version}}-{{browser}}.zip',
+  },
   vite: () => ({
     plugins: [tailwindcss()],
   }),

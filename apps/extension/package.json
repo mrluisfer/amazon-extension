@@ -13,7 +13,8 @@
     "test": "vitest run",
     "icons": "node scripts/build-icons.mjs",
     "manifest-key": "node scripts/manifest-key.mjs",
-    "zip:store": "WXT_MANIFEST_KEY= wxt zip"
+    "zip:store": "WXT_MANIFEST_KEY= wxt zip",
+    "release:testers": "node scripts/release-testers.mjs"
   },
   "dependencies": {
     "@repo/amazon-parser": "workspace:*",

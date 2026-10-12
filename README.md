@@ -117,7 +117,8 @@ details. More setup notes (expired Neon sessions, database branches) are in
 | `pnpm format` | Format and auto-fix with Biome |
 | `pnpm build` | Build API (`apps/api/dist`), extension (`apps/extension/.output`) and website (`apps/web/build`) |
 | `pnpm dev:api` / `pnpm dev:extension` | Local development |
-| `pnpm --filter @repo/extension zip` | Store-ready `.zip` |
+| `pnpm release:testers [--bump] [--install <dir>]` | Validated tester zip (+ refresh your unpacked copy) — see [deployment](docs/deployment.md#extension--testers-zip) |
+| `pnpm --filter @repo/extension zip:store` | Store-ready `.zip` (no manifest key) |
 | `pnpm db:generate` | Create a migration from `packages/db/src/schema.ts` |
 | `pnpm db:migrate` / `pnpm db:studio` | Apply migrations / open Drizzle Studio |
 

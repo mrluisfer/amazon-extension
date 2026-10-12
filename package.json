@@ -19,6 +19,7 @@
     "dev:api": "turbo run dev --filter=@repo/api",
     "dev:extension": "turbo run dev --filter=@repo/extension",
     "build": "turbo run build",
+    "release:testers": "pnpm --filter @repo/extension release:testers",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "lint": "biome check .",

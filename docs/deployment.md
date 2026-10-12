@@ -13,8 +13,8 @@ Create a **Web Service** from the GitHub repo with these settings:
 | Build filters → included paths | `apps/api/**`, `packages/shared/**`, `packages/db/**`, `package.json`, `pnpm-lock.yaml` (so website/extension changes don't redeploy the API) |
 | Region | **Ohio (US East)** — same region as the Neon database (`aws-us-east-2`) |
 | Runtime | Node |
-| Build command | `corepack enable && pnpm install --frozen-lockfile && pnpm --filter @repo/api build` |
-| Start command | `NODE_ENV=production pnpm --filter @repo/api start` |
+| Build command | `corepack pnpm install --frozen-lockfile && corepack pnpm --filter @repo/api build` |
+| Start command | `NODE_ENV=production node apps/api/dist/index.mjs` |
 | Health check path | `/health` |
 | Auto-deploy | On commit to `main` (optionally "after CI checks pass") |
 
@@ -23,6 +23,12 @@ Environment variables (Render → Environment). Render sets `PORT` itself.
 > [!IMPORTANT]
 > Don't add `NODE_ENV` here: with `NODE_ENV=production` at build time, `pnpm install` skips
 > devDependencies and the build fails (`tsdown` is one). It's set in the start command instead.
+
+Why these commands: Render's `/usr/bin` is read-only, so `corepack enable` fails with
+`EROFS … unlink '/usr/bin/pnpm'`; `corepack pnpm …` runs the pnpm version pinned in
+`packageManager` without installing shims. The start command runs Node directly — no package
+manager at runtime, faster cold starts (all runtime imports are direct dependencies of
+`@repo/api`; workspace packages are bundled into `dist/`).
 
 | Variable | Value |
 |---|---|

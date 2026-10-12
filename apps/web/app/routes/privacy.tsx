@@ -159,8 +159,10 @@ export default function Privacy() {
           body: (
             <ul>
               <li>
-                <strong>Observaciones de precio individuales:</strong> hasta 90 días, para validar
-                datos y corregir errores.
+                <strong>Observaciones de precio individuales:</strong> se conservan de forma
+                indefinida para construir el historial completo, detectar ofertas y validar datos.
+                Están asociadas al identificador aleatorio de tu instalación; si borras tus datos,
+                dejan de estar vinculadas a él.
               </li>
               <li>
                 <strong>Historial de precios por producto:</strong> de forma indefinida. Es un dato

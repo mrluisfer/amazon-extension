@@ -51,6 +51,7 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
   const [zoom, setZoom] = useState<XWindow | null>(null);
   const [visible, setVisible] = useState(allTrue);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [yRange, setYRange] = useState<{ min: number; max: number } | null>(null);
   const [tab, setTab] = useState<'history' | 'settings'>('history');
   const theme = useTheme();
 
@@ -193,6 +194,7 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
                 }}
                 onResetZoom={() => selectRange(lastRange.current)}
                 onHover={setHoverIdx}
+                onYRange={setYRange}
                 theme={theme.resolved}
               />
               <p className="mt-6 text-[10px] leading-snug text-fg-muted">
@@ -208,6 +210,7 @@ function Panel({ marketplace, asin }: { marketplace: MarketplaceId; asin: string
                 values={values}
                 onToggle={(key) => setVisible((prev) => ({ ...prev, [key]: !prev[key] }))}
                 theme={theme.resolved}
+                yRange={yRange}
               />
               <RangeSelector
                 active={range?.key ?? null}

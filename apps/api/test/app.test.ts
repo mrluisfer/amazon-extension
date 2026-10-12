@@ -10,7 +10,7 @@ const noDb = new Proxy({} as Database, {
   },
 });
 
-function makeApp(overrides: { installsCapacity?: number } = {}) {
+function makeApp(overrides: { installsCapacity?: number; allowedOrigins?: string[] } = {}) {
   return createApp({
     db: noDb,
     limiters: {
@@ -20,7 +20,7 @@ function makeApp(overrides: { installsCapacity?: number } = {}) {
     },
     config: {
       isProduction: true,
-      allowedOrigins: ['chrome-extension://allowedid'],
+      allowedOrigins: overrides.allowedOrigins ?? ['chrome-extension://allowedid'],
       trustProxy: false,
     },
   });
@@ -63,6 +63,14 @@ describe('api app', () => {
     });
     expect(allowed.headers.get('access-control-allow-origin')).toBe('chrome-extension://allowedid');
     expect(denied.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it('admits no origin in production when the allow-list is empty', async () => {
+    const res = await makeApp({ allowedOrigins: [] }).request('/health', {
+      headers: { origin: 'chrome-extension://anyid' },
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
   });
 
   it('rate-limits anonymous installs per IP', async () => {

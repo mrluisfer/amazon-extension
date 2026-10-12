@@ -80,7 +80,7 @@ export const products = pgTable(
 
 /**
  * Raw crowdsourced reports. Kept for corroboration, abuse analysis and
- * re-processing. Subject to a retention window (see docs/security.md).
+ * re-processing. Kept indefinitely (no PII; user_id is nulled on erasure).
  */
 export const priceObservations = pgTable(
   'price_observations',

@@ -17,9 +17,14 @@ export default defineConfig({
       throw new Error(`WXT_API_URL must use https in production builds (got ${apiOrigin})`);
     }
     const frameAncestors = Object.values(MARKETPLACES).map((m) => m.origin);
+    // Pins the extension ID for unpacked/zip builds (otherwise Chrome derives it from the
+    // folder path). Public key, not a secret: see scripts/manifest-key.mjs. Leave it unset
+    // for store uploads — the store assigns the ID.
+    const manifestKey = env.WXT_MANIFEST_KEY?.trim();
 
     return {
       name: 'Historial de Precios MX',
+      ...(manifestKey && { key: manifestKey }),
       description:
         'Historial de precios y alertas para Amazon México, construido por la comunidad.',
       // Least privilege: no tabs, no <all_urls>, no scripting. Each permission must be justified

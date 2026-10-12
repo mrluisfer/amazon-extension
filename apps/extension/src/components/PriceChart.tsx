@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
+import { stepIndex, valueExtent } from '@/lib/chart-data';
 import {
   formatAxisDates,
   formatAxisPrice,
@@ -24,8 +25,10 @@ interface Props {
   onZoom: (window: XWindow) => void;
   /** Double click: back to the selected range. */
   onResetZoom: () => void;
-  /** Hovered data index (null when the cursor leaves). */
+  /** Data index in effect under the cursor (null when the cursor leaves). */
   onHover: (idx: number | null) => void;
+  /** Current y scale (cents), so the legend can flag values drawn off-scale. */
+  onYRange?: (range: { min: number; max: number }) => void;
   /** Resolved theme: canvas colors can't come from CSS, so the plot is rebuilt on change. */
   theme: Theme;
   height?: number;
@@ -33,11 +36,24 @@ interface Props {
 
 interface HoverState {
   idx: number;
+  /** Cursor time (seconds) — what the date label shows. */
+  x: number;
   left: number;
   plotWidth: number;
   plotHeight: number;
-  items: { key: SeriesType; label: string; color: string; value: number; y: number }[];
+  items: {
+    key: SeriesType;
+    label: string;
+    color: string;
+    value: number;
+    y: number;
+    /** The point is inside the plot (list price can sit above the scale). */
+    onScale: boolean;
+  }[];
 }
+
+/** Reference series that must not stretch the y scale (see the y `range`). */
+const REFERENCE_SERIES: ReadonlySet<SeriesType> = new Set(['list']);
 
 const TOOLTIP_H = 38;
 const TOOLTIP_W = 118;
@@ -60,6 +76,7 @@ export function PriceChart({
   onZoom,
   onResetZoom,
   onHover,
+  onYRange,
   theme,
   height = 282,
 }: Props) {
@@ -71,8 +88,8 @@ export function PriceChart({
   const [hover, setHover] = useState<HoverState | null>(null);
 
   // Latest callbacks without re-creating the plot.
-  const cb = useRef({ onZoom, onResetZoom, onHover, visible, window });
-  cb.current = { onZoom, onResetZoom, onHover, visible, window };
+  const cb = useRef({ onZoom, onResetZoom, onHover, onYRange, visible, window });
+  cb.current = { onZoom, onResetZoom, onHover, onYRange, visible, window };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: series/palette derive from `theme`
   useLayoutEffect(() => {
@@ -86,7 +103,17 @@ export function PriceChart({
       scales: {
         x: { time: true },
         y: {
-          range: (_u, min, max) => {
+          // Scale to the selling prices in view. The list price is a reference that
+          // is often far above them; letting it into the range squashes the lines
+          // that matter (it's still drawn when in range, and shown in the legend).
+          range: (u, dataMin, dataMax) => {
+            const xs = u.data[0];
+            const [i0, i1] = u.series[0]?.idxs ?? [0, xs.length - 1];
+            const selling = series
+              .map((s, i) => ({ s, ys: u.data[i + 1] ?? [], shown: u.series[i + 1]?.show }))
+              .filter(({ s, shown }) => shown && !REFERENCE_SERIES.has(s.key))
+              .map(({ ys }) => ys);
+            const [min, max] = valueExtent(selling, i0, i1) ?? [dataMin, dataMax];
             const pad = Math.max((max - min) * 0.08, max * 0.02, 100);
             return [Math.max(0, min - pad), max + pad];
           },
@@ -133,7 +160,9 @@ export function PriceChart({
         y: false,
         // We own the x scale (controlled `window`); a drag only reports the selection.
         drag: { x: true, y: false, setScale: false },
-        points: { size: 8, width: 2, fill: palette.point },
+        // Hover dots are drawn by the React overlay at the cursor's x (uPlot's own
+        // would snap to the nearest data point).
+        points: { show: false },
         bind: {
           dblclick: () => () => {
             cb.current.onResetZoom();
@@ -153,32 +182,45 @@ export function PriceChart({
         ],
         setCursor: [
           (u) => {
-            const idx = u.cursor.idx;
-            cb.current.onHover(idx ?? null);
-            if (idx == null || u.cursor.left == null || u.cursor.left < 0) {
+            const left = u.cursor.left;
+            const xs = u.data[0];
+            const idx = left == null || left < 0 ? null : stepIndex(xs, u.posToVal(left, 'x'));
+            cb.current.onHover(idx);
+            if (idx == null || left == null) {
               setHover(null);
               return;
             }
-            const xs = u.data[0];
+            const plotHeight = u.over.clientHeight;
             const items: HoverState['items'] = [];
             series.forEach((s, i) => {
               const v = u.data[i + 1]?.[idx];
               if (v == null || !u.series[i + 1]?.show) return;
+              const y = u.valToPos(v, 'y');
               items.push({
                 key: s.key,
                 label: s.label,
                 color: s.color,
                 value: v,
-                y: u.valToPos(v, 'y'),
+                y: Math.min(Math.max(y, 0), plotHeight),
+                onScale: y >= 0 && y <= plotHeight,
               });
             });
             setHover({
               idx,
-              left: u.valToPos(xs[idx] ?? 0, 'x'),
+              x: u.posToVal(left, 'x'),
+              left,
               plotWidth: u.over.clientWidth,
-              plotHeight: u.over.clientHeight,
+              plotHeight,
               items,
             });
+          },
+        ],
+        setScale: [
+          (u, key) => {
+            const y = u.scales.y;
+            if (key === 'y' && y?.min != null && y.max != null) {
+              cb.current.onYRange?.({ min: y.min, max: y.max });
+            }
           },
         ],
       },
@@ -223,24 +265,15 @@ export function PriceChart({
     <div ref={rootRef} className="relative w-full select-none text-[11px]">
       {overEl &&
         hover &&
-        createPortal(<HoverLayer hover={hover} data={data} marketplace={marketplace} />, overEl)}
+        createPortal(<HoverLayer hover={hover} marketplace={marketplace} />, overEl)}
     </div>
   );
 }
 
-function HoverLayer({
-  hover,
-  data,
-  marketplace,
-}: {
-  hover: HoverState;
-  data: uPlot.AlignedData;
-  marketplace: MarketplaceId;
-}) {
+function HoverLayer({ hover, marketplace }: { hover: HoverState; marketplace: MarketplaceId }) {
   const placed = layoutTooltips(hover.items, TOOLTIP_H, hover.plotHeight);
   const onRight = hover.left + 24 + TOOLTIP_W < hover.plotWidth;
   const boxLeft = onRight ? hover.left + 24 : hover.left - 24 - TOOLTIP_W;
-  const ts = data[0][hover.idx] ?? 0;
 
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -257,6 +290,18 @@ function HoverLayer({
             strokeWidth={1}
           />
         ))}
+        {placed
+          .filter((p) => p.onScale)
+          .map((p) => (
+            <circle
+              key={`dot-${p.key}`}
+              cx={hover.left}
+              cy={p.y}
+              r={4}
+              strokeWidth={2}
+              style={{ fill: 'var(--color-surface)', stroke: p.color }}
+            />
+          ))}
       </svg>
       {placed.map((p) => (
         <div
@@ -286,7 +331,7 @@ function HoverLayer({
           left: Math.min(Math.max(hover.left - 60, 0), hover.plotWidth - 120),
         }}
       >
-        {formatCursorDate(ts, marketplace)}
+        {formatCursorDate(hover.x, marketplace)}
       </div>
     </div>
   );

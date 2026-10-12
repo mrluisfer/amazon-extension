@@ -8,7 +8,12 @@ const EnvSchema = v.object({
   ),
   /** Runtime connection: pooled Neon URL with the least-privileged app role. */
   DATABASE_URL: v.pipe(v.string(), v.startsWith('postgres', 'DATABASE_URL must be a postgres URL')),
-  /** Comma-separated list, e.g. "chrome-extension://abcdef...,moz-extension://..." */
+  /**
+   * Origins allowed to read API responses via CORS, comma-separated, e.g.
+   * "chrome-extension://abcdef...,moz-extension://...". Optional: the extension's
+   * background calls the API with host permissions, which are exempt from CORS, so
+   * an empty list (no web origin can read responses) is the safest default.
+   */
   ALLOWED_ORIGINS: v.optional(
     v.pipe(
       v.string(),
@@ -40,8 +45,5 @@ export function loadEnv(source: Record<string, string | undefined>): Env {
     throw new Error(`Invalid environment:\n  ${issues}`);
   }
   const env = result.output;
-  if (env.NODE_ENV === 'production' && env.ALLOWED_ORIGINS.length === 0) {
-    throw new Error('ALLOWED_ORIGINS is required in production');
-  }
   return env;
 }

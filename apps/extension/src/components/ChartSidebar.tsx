@@ -11,6 +11,8 @@ interface LegendProps {
   values: Record<SeriesType, number | null>;
   onToggle: (key: SeriesType) => void;
   theme: Theme;
+  /** Current y scale: values outside it (usually the list price) get an arrow. */
+  yRange?: { min: number; max: number } | null;
 }
 
 export function ChartLegend({
@@ -20,12 +22,22 @@ export function ChartLegend({
   values,
   onToggle,
   theme,
+  yRange,
 }: LegendProps) {
   return (
     <ul className="flex flex-col gap-0.5" aria-label="Series">
       {seriesFor(theme).map((s) => {
         const enabled = available[s.key];
         const on = enabled && visible[s.key];
+        const value = on ? values[s.key] : null;
+        const off =
+          value == null || !yRange
+            ? null
+            : value > yRange.max
+              ? 'above'
+              : value < yRange.min
+                ? 'below'
+                : null;
         return (
           <li key={s.key}>
             <button
@@ -45,9 +57,19 @@ export function ChartLegend({
               />
               <span className={on ? 'text-fg' : 'text-fg-subtle'}>{s.label}</span>
               <span className="ml-auto tabular-nums text-fg-2">
-                {on && values[s.key] != null
-                  ? formatPrice(values[s.key] as number, marketplace)
-                  : ''}
+                {off && (
+                  <span
+                    className="mr-1 text-fg-muted"
+                    title={
+                      off === 'above'
+                        ? 'Por encima de la escala de la gráfica'
+                        : 'Por debajo de la escala de la gráfica'
+                    }
+                  >
+                    {off === 'above' ? '↑' : '↓'}
+                  </span>
+                )}
+                {value != null ? formatPrice(value, marketplace) : ''}
               </span>
             </button>
           </li>

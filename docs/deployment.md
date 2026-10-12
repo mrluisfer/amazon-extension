@@ -34,7 +34,7 @@ manager at runtime, faster cold starts (all runtime imports are direct dependenc
 |---|---|
 | `NODE_VERSION` | `24` |
 | `DATABASE_URL` | Neon **pooled** connection string (host contains `-pooler`) for the least-privileged `app_runtime` role — see [`security.md`](security.md#database-roles-neon). Never the owner role. |
-| `ALLOWED_ORIGINS` | `chrome-extension://<extension-id>` (comma-separated; add `moz-extension://…` / Edge IDs as needed). Required in production. |
+| `ALLOWED_ORIGINS` | Optional. Origins allowed to read responses via CORS, comma-separated. The extension doesn't need it: its background calls the API with host permissions, which bypass CORS. Leave it empty unless a web page must call the API. |
 | `TRUST_PROXY` | `true` — Render's proxy sets `X-Forwarded-For`, which the per-IP rate limits rely on. |
 
 Notes:
@@ -68,13 +68,28 @@ Environment variables:
 The site is fully static (every route prerendered), so previews and production cost nothing
 beyond the free tier.
 
+## Extension → testers (zip)
+
+Pin the extension ID so it doesn't depend on the folder each tester unzips into (otherwise
+their data resets whenever the path changes):
+
+```bash
+# Once: creates the private key OUTSIDE the repo and prints the public key + ID.
+pnpm --filter @repo/extension manifest-key -- ~/.config/historial-precios-mx/extension-key.pem
+# Put the printed WXT_MANIFEST_KEY=… in apps/extension/.env, then:
+WXT_API_URL=https://<your-api>.onrender.com pnpm --filter @repo/extension zip
+```
+
+Back up the `.pem` (password manager): losing it changes the ID for future builds. Testers
+unzip into a folder and use *Load unpacked*; updates = unzip over the same folder + reload.
+
 ## Extension → Chrome Web Store (and Edge / Firefox)
 
 1. Build against the production API:
-   `WXT_API_URL=https://<your-api>.onrender.com pnpm --filter @repo/extension zip`
+   `WXT_API_URL=https://<your-api>.onrender.com pnpm --filter @repo/extension zip:store`
+   (`zip:store` always omits the manifest `key`, even if `WXT_MANIFEST_KEY` is in your `.env`)
    (production builds refuse a non-HTTPS API URL). Firefox: `pnpm --filter @repo/extension zip -b firefox`.
-2. Upload the zip from `apps/extension/.output/`. The store assigns the extension ID: add
-   `chrome-extension://<id>` to the API's `ALLOWED_ORIGINS`.
+2. Upload the zip from `apps/extension/.output/`. The store assigns the extension ID.
 3. Listing: privacy policy URL (`https://<website>/privacidad`), the permission justifications
    from [`security.md`](security.md#manifest-permissions-keep-in-sync-with-the-store-listing), the
    non-affiliation notice ([`brand.md`](brand.md)), and screenshots of the panel.
@@ -82,5 +97,4 @@ beyond the free tier.
    AMO are free.
 
 Before the first public release, check the launch items in
-[`security.md` → Known gaps](security.md#known-gaps--todo) (e.g. the observation retention job
-promised by the privacy policy).
+[`security.md` → Known gaps](security.md#known-gaps--todo).

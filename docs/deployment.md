@@ -73,15 +73,32 @@ beyond the free tier.
 Pin the extension ID so it doesn't depend on the folder each tester unzips into (otherwise
 their data resets whenever the path changes):
 
+One-time setup:
+
 ```bash
-# Once: creates the private key OUTSIDE the repo and prints the public key + ID.
+# Creates the private key OUTSIDE the repo and prints the public key + extension ID.
 pnpm --filter @repo/extension manifest-key -- ~/.config/historial-precios-mx/extension-key.pem
-# Put the printed WXT_MANIFEST_KEY=… in apps/extension/.env, then:
-WXT_API_URL=https://<your-api>.onrender.com pnpm --filter @repo/extension zip
 ```
 
-Back up the `.pem` (password manager): losing it changes the ID for future builds. Testers
-unzip into a folder and use *Load unpacked*; updates = unzip over the same folder + reload.
+- Put the printed `WXT_MANIFEST_KEY=…` in `apps/extension/.env`.
+- Put `WXT_API_URL=https://<your-api>.onrender.com` in `apps/extension/.env.production`
+  (both git-ignored; `.env.production` only applies to production builds, so `pnpm dev:extension`
+  keeps using the local API).
+- Back up the `.pem` (password manager): losing it changes the ID for future builds.
+
+Every release:
+
+```bash
+pnpm release:testers --bump --install ~/Extensions/historial-precios-mx
+```
+
+It refuses to build against `localhost`/non-https or without the key, bumps the patch
+version (`--bump`, optional), writes `apps/extension/.output/historial-precios-mx-<version>-chrome.zip`
+and, with `--install` (or `EXTENSION_INSTALL_DIR`), refreshes your own unpacked copy — then
+click ↻ in `chrome://extensions`. Commit the version bump.
+
+Testers unzip into a folder once and use *Load unpacked*; each update = unzip over the same
+folder + ↻ (same folder → same ID and data).
 
 ## Extension → Chrome Web Store (and Edge / Firefox)
 

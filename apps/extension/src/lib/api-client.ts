@@ -9,8 +9,9 @@ import type {
   TrackProductInput,
 } from '@repo/shared';
 import { hc } from 'hono/client';
+import { parseRetryAfter, registrationDelayMs } from './backoff';
 import { API_URL } from './config';
-import { authTokenItem } from './storage';
+import { authTokenItem, registrationBackoffItem } from './storage';
 
 /** Background-only. Requests are typed end-to-end against the Hono app. */
 
@@ -38,15 +39,41 @@ async function getToken(): Promise<string> {
   if (existing) return existing;
   // Single-flight: concurrent callers share one registration.
   registering ??= (async () => {
-    const res = await publicClient.v1.installs.$post();
-    if (!res.ok) throw await toError(res);
+    // After a failure, don't hammer the API on every message: that burns the per-IP
+    // install quota and trips Chrome's extension throttling on repeated 5xx.
+    const backoff = await registrationBackoffItem.getValue();
+    if (backoff && Date.now() < backoff.retryAt) {
+      throw new ApiRequestError(503, 'registration_backoff', 'Registration temporarily paused');
+    }
+    let res: Response;
+    try {
+      res = await publicClient.v1.installs.$post();
+    } catch (err) {
+      await recordRegistrationFailure(backoff?.failures ?? 0, null);
+      throw err;
+    }
+    if (!res.ok) {
+      await recordRegistrationFailure(
+        backoff?.failures ?? 0,
+        parseRetryAfter(res.headers.get('retry-after')),
+      );
+      throw await toError(res);
+    }
     const { token } = (await res.json()) as { token: string };
-    await authTokenItem.setValue(token);
+    await Promise.all([authTokenItem.setValue(token), registrationBackoffItem.setValue(null)]);
     return token;
   })().finally(() => {
     registering = null;
   });
   return registering;
+}
+
+async function recordRegistrationFailure(previous: number, retryAfterS: number | null) {
+  const failures = previous + 1;
+  await registrationBackoffItem.setValue({
+    failures,
+    retryAt: Date.now() + registrationDelayMs(failures, retryAfterS),
+  });
 }
 
 async function toError(res: Response): Promise<ApiRequestError> {

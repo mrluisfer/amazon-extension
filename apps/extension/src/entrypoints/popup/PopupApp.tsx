@@ -73,7 +73,7 @@ export function PopupApp() {
           {tracked.status === 'error' && <p className="text-danger">No se pudo cargar la lista.</p>}
           {tracked.status === 'success' && !tracked.data.hasAccount && (
             <p className="text-fg-muted">
-              Inicia sesión para crear avisos de precio y verlos aquí.
+              Próximamente podrás seguir productos y recibir avisos de precio aquí.
             </p>
           )}
           {tracked.status === 'success' &&

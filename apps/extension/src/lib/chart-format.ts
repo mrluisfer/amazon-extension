@@ -33,6 +33,36 @@ export function formatAxisDate(seconds: number, marketplace: MarketplaceId): str
     .replace('.', '');
 }
 
+/** Axis time of day: "15:00" (24h keeps tick labels short and unambiguous). */
+function formatAxisTime(seconds: number, marketplace: MarketplaceId): string {
+  const { locale } = MARKETPLACES[marketplace];
+  return memo(
+    `axisTime:${marketplace}`,
+    () => new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', hourCycle: 'h23' }),
+  ).format(seconds * 1000);
+}
+
+const DAY_S = 86_400;
+
+/**
+ * Labels for the x-axis ticks. With day-or-larger spacing every tick is a date;
+ * with sub-day spacing (young products, zoomed in) ticks show the time and the
+ * date only where the day changes — never "9 oct, 9 oct, 9 oct".
+ */
+export function formatAxisDates(splits: readonly number[], marketplace: MarketplaceId): string[] {
+  const first = splits[0];
+  const second = splits[1];
+  const step = first !== undefined && second !== undefined ? second - first : DAY_S;
+  let prevDate: string | null = null;
+  return splits.map((s) => {
+    const date = formatAxisDate(s, marketplace);
+    if (step >= DAY_S) return date;
+    const label = date !== prevDate ? date : formatAxisTime(s, marketplace);
+    prevDate = date;
+    return label;
+  });
+}
+
 /** Crosshair label: "mié, 23 sep, 6:55". */
 export function formatCursorDate(seconds: number, marketplace: MarketplaceId): string {
   const { locale } = MARKETPLACES[marketplace];

@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@neon/env": "^1.5.3",
-    "tsdown": "^0.23.0",
+    "tsdown": "^0.23.1",
     "tsx": "^4.23.15",
     "unrun": "^0.3.1"
   }

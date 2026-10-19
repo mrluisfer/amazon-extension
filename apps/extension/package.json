@@ -21,8 +21,8 @@
     "@repo/brand": "workspace:*",
     "@repo/shared": "workspace:*",
     "hono": "^4.13.13",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "uplot": "^1.6.32",
     "valibot": "^1.5.0"
   },
@@ -36,7 +36,7 @@
     "happy-dom": "^20.14.6",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.4",
-    "web-ext": "^10.7.0",
+    "web-ext": "^10.8.0",
     "wxt": "^0.21.4"
   }
 }

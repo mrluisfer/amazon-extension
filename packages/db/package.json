@@ -18,7 +18,7 @@
     "drizzle-orm": "^0.45.4"
   },
   "devDependencies": {
-    "@neon/env": "^1.5.3",
+    "@neon/env": "^1.6.4",
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15"
   }

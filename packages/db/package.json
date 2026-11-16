@@ -13,7 +13,7 @@
     "db:studio": "node ../../scripts/neon-env-run.mjs -- drizzle-kit studio"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.2.0",
+    "@neondatabase/serverless": "^1.2.1",
     "@repo/shared": "workspace:*",
     "drizzle-orm": "^0.45.4"
   },
